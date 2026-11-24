@@ -26,6 +26,11 @@
   color-scheme: dark;
 }
 
+/* Always reserve room for the scrollbar, so short and long pages are equally wide. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Scale the whole UI up a little on big screens (Tailwind sizes are rem-based). */
 @media (min-width: 1280px) {
   html {

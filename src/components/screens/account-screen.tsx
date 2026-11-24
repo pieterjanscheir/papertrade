@@ -23,7 +23,7 @@ export function AccountScreen() {
   const [confirm, setConfirm] = useState<StartKind | null>(null);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-7">
+    <div className="flex flex-col gap-7">
       <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
 
       <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-6">

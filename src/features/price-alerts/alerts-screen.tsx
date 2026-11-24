@@ -12,7 +12,7 @@ export function AlertsScreen() {
   const done = alerts.filter((a) => a.triggeredAt);
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">Price alerts</h1>
       <Card className="p-5">
         <p className="mb-2 text-sm font-semibold text-muted">Active</p>

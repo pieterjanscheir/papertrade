@@ -70,7 +70,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="min-w-0 flex-1 px-4 pb-28 md:px-8 md:pb-12 xl:px-12">
         <DemoBanner />
-        <div className="pt-5 md:pt-8">{children}</div>
+        {/* One content width for every page, so nothing jumps when switching tabs. */}
+        <div className="mx-auto w-full max-w-[1280px] pt-5 md:pt-8">{children}</div>
       </main>
 
       {/* Mobile bottom nav */}

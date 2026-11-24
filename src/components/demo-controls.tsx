@@ -131,9 +131,9 @@ const PRESETS: Preset[] = [
   },
   {
     label: "Autobahn rally",
-    detail: "🇩🇪 +8% in 5 min",
+    detail: "🇩🇪 +40% in 5 min",
     tone: "gain",
-    events: () => [{ label: "Autobahn rally", target: "region:Germany", move: 0.08, duration: 5 * MINUTE, kind: "move", headline: "German stocks rally on a stretch with no speed limit" }],
+    events: () => [{ label: "Autobahn rally", target: "region:Germany", move: 0.4, duration: 5 * MINUTE, kind: "move", headline: "German stocks rally on a stretch with no speed limit" }],
   },
   {
     label: "Bank wobble",

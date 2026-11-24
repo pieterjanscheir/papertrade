@@ -109,7 +109,7 @@ export function AssetScreen({ symbol }: { symbol: string }) {
   if (!now) return <ScreenSkeleton />;
 
   return (
-    <div className="grid gap-8 pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(340px,400px)] lg:gap-10 lg:pb-0">
+    <div className="grid gap-8 pb-20 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10 lg:pb-0">
       {/* Main column */}
       <div className="flex min-w-0 flex-col gap-7">
         <div className="flex items-center justify-between">

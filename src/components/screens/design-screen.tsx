@@ -46,7 +46,7 @@ export function DesignScreen() {
   const candles = market.candles("ASML", "1M", now);
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-12">
+    <div className="flex flex-col gap-12">
       <header>
         <p className="text-sm font-semibold text-accent">For builders</p>
         <h1 className="mt-1 text-4xl font-semibold tracking-tight">Design system</h1>

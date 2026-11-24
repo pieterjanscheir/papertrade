@@ -59,7 +59,7 @@ export function HomeScreen() {
   );
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] xl:gap-10">
+    <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px] xl:gap-10">
       {/* Main column */}
       <div className="flex min-w-0 flex-col gap-8">
         <div className="flex flex-wrap items-end justify-between gap-4">

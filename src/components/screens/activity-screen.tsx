@@ -45,7 +45,7 @@ export function ActivityScreen() {
   if (!now) return <ScreenSkeleton />;
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-semibold tracking-tight">Activity</h1>
 
       <div className="grid grid-cols-3 gap-3">
