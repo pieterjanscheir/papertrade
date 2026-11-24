@@ -23,6 +23,8 @@ Take five minutes to click around:
 - **Invest**: every stock, ETF and coin
 - **An asset page**: line and candle charts, the order panel (market, limit and stop orders), and news
 - **News**: satirical headlines generated from the simulated prices, written per instrument (`src/features/news`, a second example feature). Add your own jokes in `flavor.ts`, following the house rules at the top of the file
+- **Options** on every asset page: a chain, a trade sheet with a payoff chart, settlement at expiry
+- **Learn**: lessons with joke “videos” and real notes (`src/features/learn`). Feature ideas from the workshop that are about education fit here
 - **ESG vibes** on every asset page: a comedic, made-up ESG report (`src/features/esg`, a third example)
 - **Activity**: transactions and orders
 - **For builders** (bottom of the sidebar): **Demo controls** (`Shift + D`) and the **Design system** page
@@ -90,15 +92,15 @@ Put the actual UI in a client component (`"use client"` at the top) inside your 
 ```tsx
 "use client";
 import { market } from "@/lib/market/provider";
-import { summarize } from "@/lib/trading/engine";
+import { portfolioSummary } from "@/lib/trading/portfolio";
 import { useAccount } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
 
 export function MyWidget() {
   const now = useNow();                // ticks every 2 seconds (and follows demo controls)
   const account = useAccount();        // cash, positions, transactions, orders, watchlist
-  const portfolio = summarize(account, market.priceAt, now);
-  // portfolio.total, .invested, .cash, .pnl, .pnlPct, .holdings[] (value, pnl, weight…)
+  const portfolio = portfolioSummary(account, now); // from "@/lib/trading/portfolio"
+  // portfolio.total, .invested, .cash, .pnl, .pnlPct, .holdings[], .options[]
 
   const nvda = market.quote("NVDA", now);              // price, change, changePct
   const chart = market.history("NVDA", "1M", now);     // [{ t, price }]

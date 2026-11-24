@@ -6,7 +6,8 @@ import { ArrowUpFromLine, Compass, History, Plus } from "lucide-react";
 import { enabledFeatures } from "@/features";
 import { market } from "@/lib/market/provider";
 import { sampleTimes, type Range } from "@/lib/market/simulator";
-import { netDeposits, summarize, valueHistory } from "@/lib/trading/engine";
+import { netDeposits } from "@/lib/trading/engine";
+import { portfolioHistory, portfolioSummary } from "@/lib/trading/portfolio";
 import { availableCash, openOrders } from "@/lib/trading/orders";
 import { useAccount } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
@@ -16,6 +17,7 @@ import { AllocationCard } from "../allocation-card";
 import { AssetRow } from "../asset-row";
 import { HoldingsTable } from "../holdings-table";
 import { MoneySheet, type MoneyAction } from "../money-sheet";
+import { OptionPositions } from "../options-chain";
 import { OrderList } from "../open-orders";
 import { PriceChart } from "../price-chart";
 import { Button, Card, EmptyState, IconAction, RangeTabs, SectionTitle } from "../ui";
@@ -28,14 +30,14 @@ export function HomeScreen() {
   const [hover, setHover] = useState<number | null>(null);
   const [moneyAction, setMoneyAction] = useState<MoneyAction | null>(null);
 
-  const summary = summarize(account, market.priceAt, now);
+  const summary = portfolioSummary(account, now);
   const orders = openOrders(account);
 
   const firstTx = account.transactions.reduce((m, t) => Math.min(m, t.time), Infinity);
   const history = useMemo(() => {
     let times = sampleTimes(range, now).filter((t) => t >= firstTx);
     if (times.length < 2) times = [Math.min(firstTx, now - 60_000), now];
-    return valueHistory(account.transactions, times, market.priceAt);
+    return portfolioHistory(account.transactions, times);
   }, [account.transactions, range, now, firstTx]);
 
   const first = history[0];
@@ -126,6 +128,14 @@ export function HomeScreen() {
               <HoldingsTable summary={summary} now={now} />
             )}
           </Card>
+          {summary.options.length > 0 && (
+            <>
+              <p className="mt-5 mb-2 px-1 text-sm font-semibold text-muted">Options</p>
+              <Card className="overflow-hidden">
+                <OptionPositions options={summary.options} now={now} />
+              </Card>
+            </>
+          )}
         </div>
       </div>
 

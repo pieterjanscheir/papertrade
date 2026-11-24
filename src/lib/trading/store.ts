@@ -31,6 +31,13 @@ import {
   type PendingOrderRequest,
 } from "./orders";
 import { createDemoAccount, createFreshAccount } from "./seed";
+import { multiplier, parseContract, quoteOption } from "../market/options";
+import {
+  executeOptionOrder,
+  settleExpiredOptions,
+  type OptionOrderRequest,
+  type OptionSettlement,
+} from "./options-trading";
 import type { Order } from "./engine";
 
 export type StartKind = "demo" | "fresh";
@@ -40,6 +47,9 @@ interface AccountStore {
   placeOrder: (req: OrderRequest) => Result<Transaction>;
   placePendingOrder: (req: PendingOrderRequest) => Result<Order>;
   cancelOrder: (id: string) => void;
+  placeOptionOrder: (req: OptionOrderRequest) => Result<Transaction>;
+  /** Cash-settle options that expired by `now`. */
+  settleOptions: (now: number) => OptionSettlement[];
   /** Fill/expire open orders up to `now`. Returns what happened, for notifications. */
   processOrders: (now: number) => OrderEvent[];
   deposit: (amount: number) => Result<null>;
@@ -72,6 +82,31 @@ export const useAccountStore = create<AccountStore>()(
         if (!r.ok) return r;
         set({ account: r.value.state });
         return { ok: true, value: r.value.order };
+      },
+
+      placeOptionOrder(req) {
+        const account = get().account;
+        if (!account) return { ok: false, error: "Account not loaded" };
+        const now = marketNow();
+        const c = parseContract(req.contract);
+        const r = executeOptionOrder(account, req, quoteOption(c, now), multiplier(c.symbol), now);
+        if (!r.ok) return r;
+        set({ account: r.value.state });
+        return { ok: true, value: r.value.tx };
+      },
+
+      settleOptions(now) {
+        const account = get().account;
+        if (!account || Object.keys(account.optionPositions ?? {}).length === 0) return [];
+        const r = settleExpiredOptions(
+          account,
+          now,
+          (id) => parseContract(id).expiry,
+          (id) => quoteOption(parseContract(id), now).intrinsic,
+          (id) => multiplier(id.split("|")[0]),
+        );
+        if (r.settled.length) set({ account: r.state });
+        return r.settled;
       },
 
       cancelOrder(id) {
@@ -121,11 +156,12 @@ export const useAccountStore = create<AccountStore>()(
     {
       name: STORAGE_KEY,
       partialize: (s) => ({ account: s.account }),
-      version: 2,
-      // v1 accounts had no orders.
+      version: 3,
+      // v1 accounts had no orders; v2 had no options.
       migrate: (persisted, version) => {
         const p = persisted as { account: AccountState | null };
         if (version < 2 && p.account) p.account = { ...p.account, orders: [], ordersCheckedAt: 0 };
+        if (version < 3 && p.account) p.account = { ...p.account, optionPositions: {} };
         return p as never;
       },
       // Hydrated manually in <AppProviders> to avoid SSR/client mismatches.

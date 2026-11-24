@@ -8,7 +8,7 @@ export const ORDER_FEE = 1; // flat EUR fee per trade
 export const MIN_ORDER_EUR = 1;
 export const QTY_DECIMALS = 6;
 
-export type TxType = "deposit" | "withdrawal" | "buy" | "sell";
+export type TxType = "deposit" | "withdrawal" | "buy" | "sell" | "option_buy" | "option_sell" | "option_settle";
 
 export interface Transaction {
   id: string;
@@ -22,6 +22,17 @@ export interface Transaction {
   price?: number;
   /** Only on sells: profit/loss versus average cost, after fee. */
   realizedPnl?: number;
+  /** Option transactions: contract id (see lib/market/options.ts). `quantity` = contracts, `price` = premium per share. */
+  contract?: string;
+}
+
+/** A long option position (buying to open, selling to close). */
+export interface OptionPosition {
+  contract: string;
+  /** Number of contracts. */
+  quantity: number;
+  /** Average cost per contract in EUR, fees included. */
+  avgCost: number;
 }
 
 export interface Position {
@@ -40,6 +51,8 @@ export interface AccountState {
   orders: Order[];
   /** Up to which moment open orders have been checked against prices. */
   ordersCheckedAt: number;
+  /** Option positions by contract id. */
+  optionPositions: Record<string, OptionPosition>;
 }
 
 export type OrderType = "market" | "limit" | "stop";
@@ -98,7 +111,7 @@ export function roundCash(x: number): number {
 }
 
 export function emptyAccount(): AccountState {
-  return { cash: 0, positions: {}, transactions: [], watchlist: [], orders: [], ordersCheckedAt: 0 };
+  return { cash: 0, positions: {}, transactions: [], watchlist: [], orders: [], ordersCheckedAt: 0, optionPositions: {} };
 }
 
 let counter = 0;
@@ -250,17 +263,39 @@ export interface HoldingValue extends Position {
   pnlPct: number;
 }
 
+export interface OptionHoldingValue extends OptionPosition {
+  /** Mid price per share. */
+  mark: number;
+  value: number;
+  costBasis: number;
+  pnl: number;
+  pnlPct: number;
+}
+
 export interface PortfolioSummary {
   cash: number;
+  /** Shares and options at market value. */
   invested: number;
   total: number;
   costBasis: number;
   pnl: number;
   pnlPct: number;
   holdings: HoldingValue[];
+  options: OptionHoldingValue[];
 }
 
-export function summarize(state: AccountState, price: PriceFn, t: number): PortfolioSummary {
+/** Value of one share's worth of an option (contract id, time) → EUR. */
+export type OptionMarkFn = (contract: string, t: number) => number;
+/** Shares per contract for a contract id. */
+export type MultiplierFn = (contract: string) => number;
+
+export function summarize(
+  state: AccountState,
+  price: PriceFn,
+  t: number,
+  optionMark?: OptionMarkFn,
+  mult: MultiplierFn = () => 100,
+): PortfolioSummary {
   const holdings = Object.values(state.positions)
     .map((pos) => {
       const p = price(pos.symbol, t);
@@ -271,8 +306,18 @@ export function summarize(state: AccountState, price: PriceFn, t: number): Portf
     })
     .sort((a, b) => b.value - a.value);
 
-  const invested = holdings.reduce((s, h) => s + h.value, 0);
-  const costBasis = holdings.reduce((s, h) => s + h.costBasis, 0);
+  const options = optionMark
+    ? Object.values(state.optionPositions ?? {}).map((pos) => {
+        const mark = optionMark(pos.contract, t);
+        const value = mark * mult(pos.contract) * pos.quantity;
+        const costBasis = pos.avgCost * pos.quantity;
+        const pnl = value - costBasis;
+        return { ...pos, mark, value, costBasis, pnl, pnlPct: costBasis ? pnl / costBasis : 0 };
+      })
+    : [];
+
+  const invested = holdings.reduce((s, h) => s + h.value, 0) + options.reduce((s, o) => s + o.value, 0);
+  const costBasis = holdings.reduce((s, h) => s + h.costBasis, 0) + options.reduce((s, o) => s + o.costBasis, 0);
   const pnl = invested - costBasis;
   return {
     cash: state.cash,
@@ -282,6 +327,7 @@ export function summarize(state: AccountState, price: PriceFn, t: number): Portf
     pnl,
     pnlPct: costBasis ? pnl / costBasis : 0,
     holdings,
+    options,
   };
 }
 
@@ -294,10 +340,13 @@ export function valueHistory(
   transactions: Transaction[],
   times: number[],
   price: PriceFn,
+  optionMark?: OptionMarkFn,
+  mult: MultiplierFn = () => 100,
 ): { t: number; value: number }[] {
   const txs = [...transactions].sort((a, b) => a.time - b.time);
   let cash = 0;
   const qty: Record<string, number> = {};
+  const contracts: Record<string, number> = {};
   let i = 0;
   return times.map((t) => {
     while (i < txs.length && txs[i].time <= t) {
@@ -310,10 +359,17 @@ export function valueHistory(
       } else if (tx.type === "sell") {
         cash += tx.amount - tx.fee;
         qty[tx.symbol!] = (qty[tx.symbol!] ?? 0) - tx.quantity!;
+      } else if (tx.type === "option_buy") {
+        cash -= tx.amount + tx.fee;
+        contracts[tx.contract!] = (contracts[tx.contract!] ?? 0) + tx.quantity!;
+      } else if (tx.type === "option_sell" || tx.type === "option_settle") {
+        cash += tx.amount - tx.fee;
+        contracts[tx.contract!] = (contracts[tx.contract!] ?? 0) - tx.quantity!;
       }
     }
     let value = cash;
     for (const s in qty) if (qty[s] > EPS) value += qty[s] * price(s, t);
+    if (optionMark) for (const c in contracts) if (contracts[c] > EPS) value += contracts[c] * mult(c) * optionMark(c, t);
     return { t, value };
   });
 }

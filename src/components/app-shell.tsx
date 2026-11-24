@@ -6,7 +6,7 @@ import { Activity, Compass, Home, Palette, UserRound, Zap } from "lucide-react";
 import { enabledFeatures } from "@/features";
 import { useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
-import { summarize } from "@/lib/trading/engine";
+import { portfolioSummary } from "@/lib/trading/portfolio";
 import { openOrders } from "@/lib/trading/orders";
 import { useAccount } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
@@ -100,7 +100,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 function SidebarSummary() {
   const now = useNow();
   const account = useAccount();
-  const total = summarize(account, market.priceAt, now).total;
+  const total = portfolioSummary(account, now).total;
   const open = openOrders(account).length;
   return (
     <div className="rounded-2xl border border-line p-4">

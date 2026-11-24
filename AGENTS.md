@@ -36,6 +36,7 @@ Before saying a change is done: `npm run typecheck && npm run lint && npm test`.
 | A notification | `toast({ title, body, tone, href })` from `src/lib/ui/toasts.ts` |
 | Trading rules (orders, fees, P/L) | `src/lib/trading/engine.ts` and `orders.ts`: pure functions, add tests next to them |
 | Prices, candles, assets | Read through `market` from `src/lib/market/provider.ts`. Assets are in `src/lib/market/assets.ts` |
+| Options | Pricing/contracts: `src/lib/market/options.ts`. Trading/settlement: `src/lib/trading/options-trading.ts`. Portfolio totals incl. options: `portfolioSummary` / `portfolioHistory` from `src/lib/trading/portfolio.ts` |
 | Styling | Tailwind classes using tokens from `src/app/globals.css` (`bg-surface`, `text-muted`, `text-gain`…). Reuse components from `src/components/ui.tsx` and friends; see `/design` |
 
 ## Rules

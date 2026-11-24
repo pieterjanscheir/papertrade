@@ -30,6 +30,8 @@ npm run build
 | **Invest** | 62 instruments: US, German, Dutch and Belgian stocks, DAX/AEX/BEL 20 and global ETFs, crypto, plus a fictional always-up Anthropic listing. Overview cards, search, type and region filters, sorting (A–Z, gainers, losers, best 1Y), a full table with 7-day sparklines on wide screens |
 | **Asset** | Live price; line chart or **candlesticks with volume and MA 20/50**, price axis and OHLC crosshair; lines for your average cost and open orders; position, stats, about, order history, trades |
 | **Order panel** | **Market, limit and stop orders**, buy or sell by EUR amount or units, fractional shares, expiry (1 day, 1 week, 1 month, until cancelled), €1 flat fee, live estimate. Docked next to the chart on desktop, a bottom sheet on mobile |
+| **Options** | On every asset page: an options chain (calls/puts, bid/ask, delta, 7 expiries), buy to open / sell to close, payoff chart, breakeven, time decay. European-style, cash-settled at expiry, priced with Black-Scholes on the simulated prices |
+| **Learn** (`/learn`) | Lessons on basics, orders, options and mindset, each with a joke “video” that never plays and real notes underneath, plus quizzes and progress. Somewhere in the masterclass is a case study that is not what it seems |
 | **Activity** | Transactions grouped by day, plus an Orders tab (open, filled, cancelled, expired, rejected) |
 | **Account** | Add or withdraw play money, reset to the demo or an empty account |
 
@@ -64,12 +66,15 @@ Orders also fill **while the app is closed**. When you come back, the app replay
 src/
 ├─ lib/
 │  ├─ market/
-│  │  ├─ assets.ts      ← the tradable universe (34 instruments)
+│  │  ├─ assets.ts      ← the tradable universe (62 instruments)
+│  │  ├─ options.ts     ← option contracts, expiries, strikes, Black-Scholes pricing
 │  │  ├─ simulator.ts   ← deterministic price engine: price = f(symbol, time), candles, scenario events
 │  │  └─ provider.ts    ← `market`: the ONLY thing the UI reads prices from
 │  ├─ trading/
 │  │  ├─ engine.ts      ← pure functions: market orders, fees, positions, P/L, valuation
 │  │  ├─ orders.ts      ← limit/stop orders: reserve, trigger, fill, expire, catch up
+│  │  ├─ options-trading.ts ← buy/sell option contracts, cash settlement at expiry
+│  │  ├─ portfolio.ts   ← portfolio value incl. options (use this in UI)
 │  │  ├─ seed.ts        ← demo and fresh starting accounts
 │  │  ├─ store.ts       ← zustand store persisted to localStorage
 │  │  └─ *.test.ts
@@ -133,6 +138,7 @@ A hybrid also works well: real prices for the current quote, and the simulator f
 
 **Trading features**
 - Stop-limit and trailing-stop orders (build on `orders.ts`)
+- Option strategies: spreads, covered calls, writing options with margin (build on `options-trading.ts`)
 - Make a fair leaderboard: generate prices on the server with a secret seed so nobody can peek ahead
 - Savings plans: recurring buys (for example €50 of VWCE every month), backfilled with the historical simulator
 - Market hours per exchange (only crypto trades 24/7)

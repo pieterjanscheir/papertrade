@@ -7,6 +7,8 @@ import {
   type OrderRequest,
   type PriceFn,
 } from "./engine";
+import { contractId, expiriesAt, multiplier, parseContract, quoteOption, strikesFor } from "../market/options";
+import { executeOptionOrder } from "./options-trading";
 import { placePendingOrder } from "./orders";
 
 export const STARTING_CASH = 10_000;
@@ -53,6 +55,16 @@ export function createDemoAccount(now: number, price: PriceFn): AccountState {
       if (r.ok) state = r.value.state;
     }
   }
+  // One option position: an NVIDIA call bought 10 days ago that hasn't expired yet.
+  const boughtAt = Math.floor((now - 10 * 86_400_000) / 60_000) * 60_000;
+  const expiry = expiriesAt(boughtAt).find((e) => e > now + 7 * 86_400_000);
+  if (expiry) {
+    const strike = strikesFor(price("NVDA", boughtAt))[7]; // just out of the money
+    const id = contractId("NVDA", "call", strike, expiry);
+    const r = executeOptionOrder(state, { contract: id, side: "buy", quantity: 1 }, quoteOption(parseContract(id), boughtAt), multiplier("NVDA"), boughtAt);
+    if (r.ok) state = r.value.state;
+  }
+
   // A couple of open orders so the order features are visible straight away.
   const pending = [
     { symbol: "TSLA", side: "buy", type: "limit", mode: "amount", value: 500, factor: 0.92 },

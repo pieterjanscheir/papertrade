@@ -8,7 +8,8 @@ import { market } from "@/lib/market/provider";
 import type { OrderEvent } from "@/lib/trading/orders";
 import { useAccountStore } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
-import { price, qty } from "@/lib/ui/format";
+import { contractLabel, parseContract } from "@/lib/market/options";
+import { money, price, qty, signedMoney } from "@/lib/ui/format";
 import { toast } from "@/lib/ui/toasts";
 import { DemoControls } from "./demo-controls";
 import { Logo } from "./logo";
@@ -64,6 +65,15 @@ function OrderProcessor() {
     if (!now) return;
     const events = useAccountStore.getState().processOrders(now);
     events.forEach(announce);
+    for (const { position, tx } of useAccountStore.getState().settleOptions(now)) {
+      const label = contractLabel(parseContract(position.contract));
+      toast({
+        title: tx.amount > 0 ? `Option expired in the money · ${label}` : `Option expired worthless · ${label}`,
+        body: tx.amount > 0 ? `Paid out ${money(tx.amount)} (P/L ${signedMoney(tx.realizedPnl ?? 0)})` : `Lost the premium of ${money(position.avgCost * position.quantity)}`,
+        tone: (tx.realizedPnl ?? 0) >= 0 ? "gain" : "loss",
+        href: "/activity",
+      });
+    }
   }, [now]);
   return null;
 }

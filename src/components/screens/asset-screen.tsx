@@ -8,16 +8,18 @@ import { ASSET_TYPE_LABEL } from "@/lib/market/assets";
 import { market } from "@/lib/market/provider";
 import { sma, type Range } from "@/lib/market/simulator";
 import type { Side } from "@/lib/trading/engine";
+import { portfolioSummary } from "@/lib/trading/portfolio";
 import { useAccount, useAccountStore } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
 import { dateTime, money, pct, price as fmtPrice, qty, signedMoney, tone } from "@/lib/ui/format";
 import { useIsWide } from "@/lib/ui/media";
 import { CandleChart, type Indicator } from "../candle-chart";
+import { OptionPositions, OptionsChain } from "../options-chain";
 import { OrderList } from "../open-orders";
 import { OrderForm } from "../order-form";
 import { PriceChart, type ChartMarker } from "../price-chart";
 import { TradeSheet } from "../trade-sheet";
-import { AssetAvatar, Button, Card, RangeTabs, SectionTitle } from "../ui";
+import { AssetAvatar, Button, Card, RangeTabs, ScreenSkeleton, SectionTitle } from "../ui";
 
 export function AssetScreen({ symbol }: { symbol: string }) {
   const now = useNow();
@@ -73,6 +75,16 @@ export function AssetScreen({ symbol }: { symbol: string }) {
     })),
   ];
 
+  const myOptions = portfolioSummary(account, now).options.filter((o) => o.contract.startsWith(`${symbol}|`));
+  const optionsCard = myOptions.length > 0 && (
+    <div>
+      <SectionTitle>Your options</SectionTitle>
+      <Card className="overflow-hidden">
+        <OptionPositions options={myOptions} now={now} />
+      </Card>
+    </div>
+  );
+
   const featurePanels = enabledFeatures().map((f) => (f.AssetPanel ? <f.AssetPanel key={f.id} symbol={symbol} now={now} /> : null));
 
   const positionCard = position && (
@@ -91,6 +103,9 @@ export function AssetScreen({ symbol }: { symbol: string }) {
       <Stat label="Average cost" value={fmtPrice(position.avgCost)} />
     </Card>
   );
+
+  // Server HTML inside a Suspense boundary can show before it hydrates; never show it with time = 0.
+  if (!now) return <ScreenSkeleton />;
 
   return (
     <div className="grid gap-8 pb-20 lg:grid-cols-[minmax(0,1fr)_minmax(340px,400px)] lg:gap-10 lg:pb-0">
@@ -195,6 +210,10 @@ export function AssetScreen({ symbol }: { symbol: string }) {
           </div>
         )}
 
+        {!wide && optionsCard}
+
+        <OptionsChain symbol={symbol} now={now} />
+
         {/* Feature slot: AssetPanel (src/features), in the main column on small screens */}
         {!wide && featurePanels}
 
@@ -276,6 +295,7 @@ export function AssetScreen({ symbol }: { symbol: string }) {
               </Card>
             </div>
           )}
+          {optionsCard}
           {featurePanels}
         </aside>
       )}

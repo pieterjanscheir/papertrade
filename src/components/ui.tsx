@@ -122,3 +122,19 @@ export function EmptyState({ title, body, action }: { title: string; body: strin
     </div>
   );
 }
+
+/** Placeholder shown for a moment before the screen has real data (e.g. before hydration). */
+export function ScreenSkeleton() {
+  return (
+    <div className="flex animate-pulse flex-col gap-6" aria-busy="true" aria-label="Loading">
+      <div className="h-6 w-40 rounded-lg bg-surface" />
+      <div className="h-12 w-64 rounded-xl bg-surface" />
+      <div className="h-72 rounded-[var(--radius-card)] bg-surface" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-20 rounded-[var(--radius-card)] bg-surface" />
+        ))}
+      </div>
+    </div>
+  );
+}

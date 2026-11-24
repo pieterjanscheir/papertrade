@@ -9,11 +9,14 @@ export function Sheet({
   onClose,
   title,
   children,
+  wide = false,
 }: {
   open: boolean;
   onClose: () => void;
   title?: React.ReactNode;
   children: React.ReactNode;
+  /** Wider dialog on desktop (e.g. for reading). */
+  wide?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
 
@@ -33,7 +36,7 @@ export function Sheet({
       ref={ref}
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-0 mt-auto w-full max-w-none bg-transparent p-0 text-fg sm:m-auto sm:max-w-md"
+      className={`m-0 mt-auto w-full max-w-none bg-transparent p-0 text-fg sm:m-auto ${wide ? "sm:max-w-2xl" : "sm:max-w-md"}`}
     >
       {open && (
         <div className="animate-sheet max-h-[92dvh] overflow-y-auto rounded-t-3xl border border-line bg-surface px-5 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:rounded-3xl">
