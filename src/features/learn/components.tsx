@@ -5,7 +5,8 @@ import { Check, CheckCircle2, ExternalLink, GraduationCap, Play } from "lucide-r
 import { Sheet } from "@/components/sheet";
 import { Coin3D, Tilt } from "@/components/tilt";
 import { Button, Card } from "@/components/ui";
-import { ALL_LESSONS, COURSES, type Lesson } from "./lessons";
+import { ALL_LESSONS, COURSES, type Lesson, type Quiz } from "./lessons";
+import { OptionsLab } from "./options-lab";
 import { useLearnProgress } from "./progress";
 
 const DISCLAIMER =
@@ -77,6 +78,28 @@ export function LearnScreen() {
         </Card>
       </header>
 
+      {ALL_LESSONS.filter((l) => l.featured).map((l) => (
+        <Tilt key={l.id} max={4}>
+          <button
+            onClick={() => setOpen(l)}
+            className="grid w-full items-center gap-5 overflow-hidden rounded-[var(--radius-card)] border border-accent/30 bg-surface p-4 text-left md:grid-cols-[320px_minmax(0,1fr)] md:p-5"
+          >
+            <Thumbnail lesson={l} done={done.includes(l.id)} />
+            <span className="flex flex-col gap-2">
+              <span className="w-fit rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-semibold text-accent">Featured deep dive · {l.duration}</span>
+              <span className="text-2xl font-semibold tracking-tight">{l.title}</span>
+              <span className="text-muted">{l.summary}</span>
+              <span className="text-sm text-muted">
+                {l.chapters?.length} chapters · interactive Options Lab · {l.quizzes?.length}-question quiz
+              </span>
+              <span className="mt-1 flex w-fit items-center gap-2 rounded-full bg-fg px-4 py-2 text-sm font-semibold text-bg">
+                <Play size={14} /> Start the deep dive
+              </span>
+            </span>
+          </button>
+        </Tilt>
+      ))}
+
       {COURSES.map((course) => (
         <section key={course.id} id={course.id} className="scroll-mt-20">
           <h2 className="text-xl font-semibold">{course.title}</h2>
@@ -107,10 +130,9 @@ export function LearnScreen() {
 }
 
 function LessonView({ lesson, onNext }: { lesson: Lesson; onNext: (l: Lesson) => void }) {
-  const { done, quiz, markDone, answer } = useLearnProgress();
+  const { done, markDone } = useLearnProgress();
   const [state, setState] = useState<"idle" | "loading" | "played">("idle");
   const [progress, setProgress] = useState(0);
-  const chosen = quiz[lesson.id];
 
   useEffect(() => {
     if (state !== "loading") return;
@@ -181,6 +203,49 @@ function LessonView({ lesson, onNext }: { lesson: Lesson; onNext: (l: Lesson) =>
         ))}
       </div>
 
+      {lesson.chapters && (
+        <>
+          <nav className="rounded-2xl border border-line p-4" aria-label="Chapters">
+            <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">In this lesson</p>
+            <ol className="grid gap-1 text-sm sm:grid-cols-2">
+              {lesson.chapters.map((c, i) => (
+                <li key={c.heading}>
+                  <button
+                    onClick={() => document.getElementById(`${lesson.id}-ch${i}`)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                    className="text-left text-muted hover:text-accent"
+                  >
+                    {c.heading}
+                  </button>
+                </li>
+              ))}
+              {lesson.lab && (
+                <li>
+                  <button onClick={() => document.getElementById(`${lesson.id}-lab`)?.scrollIntoView({ behavior: "smooth", block: "start" })} className="text-left font-semibold text-accent">
+                    🧪 Options Lab
+                  </button>
+                </li>
+              )}
+            </ol>
+          </nav>
+          {lesson.chapters.map((c, i) => (
+            <section key={c.heading} id={`${lesson.id}-ch${i}`} className="scroll-mt-4">
+              <h3 className="mb-2 text-lg font-semibold">{c.heading}</h3>
+              <div className="space-y-3 text-[15px] leading-relaxed">
+                {c.body.map((b, j) => (
+                  <p key={j}>{b}</p>
+                ))}
+              </div>
+              {/* Put the lab right after the chapter about payoffs at expiry. */}
+              {lesson.lab === "options" && i === 4 && (
+                <div id={`${lesson.id}-lab`} className="mt-5 scroll-mt-4">
+                  <OptionsLab />
+                </div>
+              )}
+            </section>
+          ))}
+        </>
+      )}
+
       <div className="rounded-2xl bg-surface-2 p-4">
         <p className="mb-2 text-xs font-semibold tracking-wide text-muted uppercase">Key points</p>
         <ul className="space-y-1.5 text-sm">
@@ -192,33 +257,14 @@ function LessonView({ lesson, onNext }: { lesson: Lesson; onNext: (l: Lesson) =>
         </ul>
       </div>
 
-      {lesson.quiz && (
-        <div className="rounded-2xl border border-line p-4">
-          <p className="mb-3 font-semibold">{lesson.quiz.question}</p>
-          <div className="flex flex-col gap-2">
-            {lesson.quiz.options.map((o, i) => {
-              const picked = chosen === i;
-              const correct = i === lesson.quiz!.answer;
-              const reveal = chosen !== undefined;
-              return (
-                <button
-                  key={o}
-                  onClick={() => answer(lesson.id, i)}
-                  className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
-                    reveal && correct ? "border-gain bg-gain/10" : reveal && picked ? "border-loss bg-loss/10" : "border-line hover:bg-surface-2"
-                  }`}
-                >
-                  {o}
-                </button>
-              );
-            })}
-          </div>
-          {chosen !== undefined && (
-            <p className={`mt-3 text-sm ${chosen === lesson.quiz.answer ? "text-gain" : "text-loss"}`}>
-              {chosen === lesson.quiz.answer ? "Correct. " : "Not quite. "}
-              <span className="text-muted">{lesson.quiz.explain}</span>
-            </p>
-          )}
+      {lesson.quiz && <QuizCard quiz={lesson.quiz} id={lesson.id} />}
+
+      {lesson.quizzes && (
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-semibold tracking-wide text-muted uppercase">Test yourself ({lesson.quizzes.length} questions)</p>
+          {lesson.quizzes.map((q, i) => (
+            <QuizCard key={i} quiz={q} id={`${lesson.id}:${i}`} number={i + 1} />
+          ))}
         </div>
       )}
 
@@ -239,6 +285,41 @@ function LessonView({ lesson, onNext }: { lesson: Lesson; onNext: (l: Lesson) =>
         )}
       </div>
       <p className="text-[11px] text-muted">{DISCLAIMER}</p>
+    </div>
+  );
+}
+
+function QuizCard({ quiz, id, number }: { quiz: Quiz; id: string; number?: number }) {
+  const chosen = useLearnProgress((s) => s.quiz[id]);
+  const answer = useLearnProgress((s) => s.answer);
+  return (
+    <div className="rounded-2xl border border-line p-4">
+      <p className="mb-3 font-semibold">
+        {number && <span className="mr-2 text-accent">Q{number}.</span>}
+        {quiz.question}
+      </p>
+      <div className="flex flex-col gap-2">
+        {quiz.options.map((o, i) => {
+          const reveal = chosen !== undefined;
+          return (
+            <button
+              key={o}
+              onClick={() => answer(id, i)}
+              className={`rounded-xl border px-3 py-2 text-left text-sm transition ${
+                reveal && i === quiz.answer ? "border-gain bg-gain/10" : reveal && chosen === i ? "border-loss bg-loss/10" : "border-line hover:bg-surface-2"
+              }`}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+      {chosen !== undefined && (
+        <p className={`mt-3 text-sm ${chosen === quiz.answer ? "text-gain" : "text-loss"}`}>
+          {chosen === quiz.answer ? "Correct. " : "Not quite. "}
+          <span className="text-muted">{quiz.explain}</span>
+        </p>
+      )}
     </div>
   );
 }

@@ -31,6 +31,14 @@ export interface Lesson {
   notes: string[];
   keyPoints: string[];
   quiz?: Quiz;
+  /** Longer lessons: notes split into titled chapters (shown after `notes`). */
+  chapters?: { heading: string; body: string[] }[];
+  /** Several quiz questions (shown after the single `quiz`, if any). */
+  quizzes?: Quiz[];
+  /** An interactive widget to embed in the lesson. */
+  lab?: "options";
+  /** Highlighted at the top of the Learn page. */
+  featured?: boolean;
   /** Links out to Netflix instead of being a lesson. */
   netflix?: { title: string; url: string; blurb: string };
 }
@@ -176,6 +184,153 @@ export const COURSES: Course[] = [
     title: "Options, gently",
     subtitle: "Calls, puts and the ice cube of time decay",
     lessons: [
+      {
+        id: "options-deep-dive",
+        title: "Options, explained properly",
+        duration: "24:00",
+        level: "Intermediate",
+        glyph: "🧇",
+        hue: 38,
+        featured: true,
+        summary: "The full tour: calls, puts, premiums, the Greeks and the traps. With waffles.",
+        gag: "🎬 This was meant to be a 24-minute masterclass. The presenter got as far as “so a call option is a bit like a waffle…” and has been in the kitchen ever since. Luckily, they left very good notes.",
+        notes: [
+          "This is the long one. Grab a coffee (and, if you're in Belgium, a waffle). By the end you'll be able to read an options chain, work out what a trade can make or lose, and spot the most common ways people lose money with options.",
+          "Throughout, we'll use Waffle Corp (WAFL), a completely made-up company currently trading at exactly €100 a share. Play with it in the Options Lab further down.",
+        ],
+        chapters: [
+          {
+            heading: "1. The whole idea in one sentence",
+            body: [
+              "An option is a contract that gives you the right, but not the obligation, to buy or sell something at a fixed price before a certain date. You pay for that right up front. That payment is the premium.",
+              "Real-life version: you love a second-hand bike listed at €300. You give the seller €20 to hold it for you at €300 for a month. If a better bike shows up, you walk away and lose only the €20. If bike prices suddenly jump to €400, you still buy it at €300. That €20 reservation is an option.",
+              "The person on the other side (the seller, or “writer”) keeps your €20 whatever happens, but must honour the deal if you want it.",
+            ],
+          },
+          {
+            heading: "2. Calls and puts",
+            body: [
+              "A call is the right to buy at the agreed price. You buy calls when you think the price will go up. A WAFL call with a €110 strike becomes valuable if WAFL climbs above €110.",
+              "A put is the right to sell at the agreed price. You buy puts when you think the price will go down, or as insurance for shares you already own. A WAFL put with a €90 strike becomes valuable if WAFL falls below €90.",
+              "Memory trick: you call someone up (calls like the price going up) and you put something down (puts like the price going down).",
+            ],
+          },
+          {
+            heading: "3. The five words on every option",
+            body: [
+              "Underlying: what the option is about (WAFL shares).",
+              "Strike: the agreed price (say €105).",
+              "Expiry: the last day the right exists (say the third Friday of next month).",
+              "Premium: what you pay per share for the right (say €2.40).",
+              "Contract size: how many shares one contract covers. Usually 100. So one contract at €2.40 costs €240. Here in Papertrade it's 100 for stocks and ETFs, and 1 for crypto.",
+            ],
+          },
+          {
+            heading: "4. In, at and out of the money",
+            body: [
+              "In the money: the option would be worth something if it expired right now. A call is in the money when the share price is above the strike; a put when the share price is below the strike.",
+              "At the money: strike roughly equals the share price. Out of the money: it would expire worthless right now.",
+              "The premium is made of two parts: intrinsic value (what it's worth if exercised right now) and time value (paying for the chance that things get better before expiry).",
+              "Example: WAFL is €100. A call with a €95 strike costs €7. Its intrinsic value is €5 (100 − 95), so the other €2 is time value. An out-of-the-money call is pure time value: all hope, no substance.",
+            ],
+          },
+          {
+            heading: "5. What happens at expiry (the maths that matters)",
+            body: [
+              "At expiry, time value is gone. An option is then worth exactly its intrinsic value, or zero.",
+              "Say you buy one WAFL call, strike €100, for €3 per share. That costs €300 (plus the €1 fee here). Your breakeven is strike + premium = €103.",
+              "If WAFL ends at €110, the call is worth €10 per share = €1,000. Profit: €700, more than double your money. If WAFL ends at €102, it's worth €200: you lose €100 despite being “right” about the direction. If WAFL ends at €95, it's worth €0: you lose the full €300.",
+              "Puts work in mirror image. A put with strike €100 bought for €4 breaks even at €96. At €90 it's worth €1,000 (profit €600). At €100 or above, you lose the €400.",
+              "The golden rule for buyers: the most you can lose is the premium you paid. The Options Lab below draws this as a hockey-stick shaped line.",
+            ],
+          },
+          {
+            heading: "6. What moves the price before expiry: the Greeks",
+            body: [
+              "Options professionals describe price sensitivity with Greek letters. You only need four, and only roughly.",
+              "Delta: how much the option moves when the share moves €1. A call with a delta of 0.30 gains about €0.30 per share (€30 per contract) when WAFL rises €1. Delta also works as a rough guess of the chance the option ends in the money.",
+              "Theta: time decay. How much value the option loses per day if nothing happens. It speeds up in the final weeks, like an ice cube melting faster as it gets smaller. The trade sheet here shows it per day.",
+              "Vega and implied volatility: options are pricier when big moves are expected. Before big news, premiums swell; after the news, they often collapse (“volatility crush”), even if the share moved your way.",
+              "Gamma: how fast delta itself changes. It's highest for at-the-money options near expiry, which is why those can swing wildly.",
+            ],
+          },
+          {
+            heading: "7. Buying versus selling options",
+            body: [
+              "Buying an option: limited loss (the premium), potentially large gain, but you fight time decay every day.",
+              "Selling (writing) an option: you collect the premium up front and time decay works for you, but you take on the obligation. Selling a call without owning the shares has, in theory, unlimited risk, because there's no ceiling on how high a price can go.",
+              "That's why Papertrade only lets you buy options and sell the ones you own. Writing options with proper margin rules is a great hackathon challenge.",
+            ],
+          },
+          {
+            heading: "8. Four classic strategies (in one line each)",
+            body: [
+              "Protective put: own the shares, buy a put below the current price. Insurance against a big drop, paid for with the premium.",
+              "Covered call: own the shares, sell a call above the current price. Extra income, but you give up gains above the strike.",
+              "Straddle: buy a call and a put at the same strike. You profit from a big move in either direction, and lose if nothing happens.",
+              "Spread: buy one option and sell another at a different strike. Cheaper than a single option, with capped profit and capped loss.",
+            ],
+          },
+          {
+            heading: "9. How people actually lose money with options",
+            body: [
+              "Lottery tickets: buying far out-of-the-money options because they're cheap. Cheap means unlikely. Most expire worthless. (Load “The Options Gambler” in Account to see this play out.)",
+              "Ignoring time: being right about direction but too late. The option expired before the move came.",
+              "Sizing too big: an option can go to zero in days. Only spend what you're fine losing completely.",
+              "Buying right before big news: high implied volatility means you overpay, then the premium deflates after the announcement.",
+            ],
+          },
+          {
+            heading: "10. Try it yourself (with play money)",
+            body: [
+              "Open any stock, scroll to Options, and tap an ask price to open the trade sheet. Look at the payoff chart, the breakeven, delta and time decay before you buy.",
+              "Then open the demo controls (Shift + D), jump a week ahead and watch the time value melt. Or trigger a Rally and see your call wake up.",
+              "Congratulations: you now know more about options than most people who confidently talk about them at parties.",
+            ],
+          },
+        ],
+        keyPoints: [
+          "An option is a right, not an obligation, bought for a premium",
+          "Calls gain when prices rise, puts when prices fall",
+          "Premium = intrinsic value + time value",
+          "Breakeven for a bought call = strike + premium",
+          "When buying, the maximum loss is the premium",
+          "Time decay (theta) works against buyers, every day",
+        ],
+        lab: "options",
+        quizzes: [
+          {
+            question: "You bought a put with strike €50. At expiry the stock is €42. What's the put worth per share?",
+            options: ["€0", "€8", "€42"],
+            answer: 1,
+            explain: "A put lets you sell at €50 while the market price is €42: €50 − €42 = €8 per share.",
+          },
+          {
+            question: "A call with strike €120 costs €6. Where is the breakeven at expiry?",
+            options: ["€114", "€120", "€126"],
+            answer: 2,
+            explain: "For a bought call: strike + premium = €120 + €6 = €126.",
+          },
+          {
+            question: "The stock goes nowhere for two weeks. What usually happens to an option you bought?",
+            options: ["It gains value", "It loses value", "It stays exactly the same"],
+            answer: 1,
+            explain: "Time decay (theta): every day without a move, part of the time value disappears.",
+          },
+          {
+            question: "A call has a delta of 0.60. The stock rises €2. Roughly what does one contract (100 shares) gain?",
+            options: ["€60", "€120", "€200"],
+            answer: 1,
+            explain: "0.60 × €2 = €1.20 per share, × 100 shares = €120. Delta is an estimate, so “roughly”.",
+          },
+          {
+            question: "Which position has a limited maximum loss?",
+            options: ["Buying a call", "Selling a call without owning the shares", "Both"],
+            answer: 0,
+            explain: "A buyer can lose at most the premium. A naked call seller's loss has no ceiling.",
+          },
+        ],
+      },
       {
         id: "calls-puts",
         title: "Calls and puts in plain English",
