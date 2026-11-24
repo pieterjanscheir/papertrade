@@ -7,7 +7,7 @@ import { useToasts } from "@/lib/ui/toasts";
 export function Toaster() {
   const { toasts, dismiss } = useToasts();
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex flex-col items-center gap-2 p-4 md:items-end md:p-6">
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-[60] flex flex-col items-center gap-2 p-4 md:p-6">
       {toasts.map((t) => {
         const dot = t.tone === "gain" ? "bg-gain" : t.tone === "loss" ? "bg-loss" : "bg-accent";
         const content = (

@@ -42,8 +42,8 @@ export function AssetScreen({ symbol }: { symbol: string }) {
   const candles = allCandles.slice(MA_EXTRA);
   const indicators: Indicator[] = [];
   if (chartType === "candles") {
-    if (overlays.ma20) indicators.push({ label: "MA 20", color: "#f5a524", values: sma(allCandles, 20).slice(MA_EXTRA) });
-    if (overlays.ma50) indicators.push({ label: "MA 50", color: "#a46bff", values: sma(allCandles, 50).slice(MA_EXTRA) });
+    if (overlays.ma20) indicators.push({ label: "MA 20", color: "#22b8cf", values: sma(allCandles, 20).slice(MA_EXTRA) });
+    if (overlays.ma50) indicators.push({ label: "MA 50", color: "#b48cff", values: sma(allCandles, 50).slice(MA_EXTRA) });
   }
 
   // Header follows whichever chart is being hovered.
@@ -141,8 +141,8 @@ export function AssetScreen({ symbol }: { symbol: string }) {
               <>
                 {(
                   [
-                    ["ma20", "MA 20", "#f5a524"],
-                    ["ma50", "MA 50", "#a46bff"],
+                    ["ma20", "MA 20", "#22b8cf"],
+                    ["ma50", "MA 50", "#b48cff"],
                     ["volume", "Volume", "var(--color-muted)"],
                   ] as const
                 ).map(([key, label, color]) => (

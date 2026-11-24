@@ -21,7 +21,8 @@ Take five minutes to click around:
 
 - **Home**: portfolio value, holdings, allocation, open orders
 - **Invest**: every stock, ETF and coin
-- **An asset page**: line and candle charts, and the order panel (market, limit and stop orders)
+- **An asset page**: line and candle charts, the order panel (market, limit and stop orders), and news
+- **News**: satirical headlines generated from the simulated prices (`src/features/news`, a second example feature)
 - **Activity**: transactions and orders
 - **For builders** (bottom of the sidebar): **Demo controls** (`Shift + D`) and the **Design system** page
 
@@ -187,14 +188,15 @@ Call it from your component with `fetch("/api/explain", { method: "POST", body: 
 
 ## 4. Demo controls: rehearse your pitch
 
-Open them with **`Shift + D`** (or "Demo controls" in the sidebar).
+Open them with **`Shift + D`** (or "Demo controls" in the sidebar). Three tabs:
 
-- **Clock speed**: pause (perfect for screenshots), real time, or 1 minute / 10 minutes / 1 hour per second.
-- **Jump ahead**: +1 hour, day, week or month. Open orders fill along the way at the exact minute they trigger.
-- **Scenarios**: crash, flash dip, rally, spike or volatility storm, for the whole market or one asset. Crypto and volatile stocks move more in a market-wide crash.
-- **Back to live** puts everything back to normal.
+- **Clock**: pause (perfect for screenshots), live speed, 10×, 1 min, 10 min, 1 hour or 1 day per second, or type your own multiplier. Step forward a minute up to a month, or jump to an exact date and time. Open orders fill along the way at the exact minute they trigger.
+- **Scenarios**: pick who is affected (whole market, an asset type, a sector or one asset), then hit a preset: crash, flash dip, rally, spike, meme mania, volatility storm, tech selloff, crypto winter, bank wobble. Or build your own: size (−60% to +60%), how long it plays out, when it starts (now or scheduled) and an optional headline. Each active scenario shows its progress and can be removed on its own.
+- **Account**: add play money, cancel all open orders, or reset to the demo portfolio or an empty account.
 
-A yellow banner shows whenever the app is not live, so your audience knows.
+Shortcuts: `⇧D` panel, `⇧P` pause/resume, `⇧.` +1 hour, `⇧L` back to live.
+
+A violet banner shows whenever the app is not live, so your audience knows. Scenarios with a headline also appear as **BREAKING** news in the news feed and pop up a notification, which makes for a good opening to a pitch.
 
 Story idea: "Here's Sam's portfolio. A crash hits." Trigger it. "Without our feature… With it…" Toggle `enabled` on your feature, or show both on two laptops.
 

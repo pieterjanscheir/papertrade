@@ -12,8 +12,10 @@
   --color-line: #262a33;
   --color-fg: #f4f5f7;
   --color-muted: #8b919e;
-  --color-accent: #6d7cff;
-  --color-accent-2: #a46bff;
+  --color-accent: #f5c04a; /* gold */
+  --color-accent-2: #c98b1b; /* deep gold, gradient partner */
+  --color-on-accent: #1a1406; /* text on gold backgrounds */
+  --color-demo: #b48cff; /* demo-mode indicators, so they never look like the brand */
   --color-gain: #2fd18b;
   --color-loss: #ff5d6c;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
@@ -34,6 +36,10 @@
   html {
     font-size: 18px;
   }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
 html,

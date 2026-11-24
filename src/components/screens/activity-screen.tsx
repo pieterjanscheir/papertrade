@@ -68,7 +68,7 @@ export function ActivityScreen() {
           >
             {t}
             {t === "orders" && orders.some((o) => o.status === "open") && (
-              <span className="ml-2 rounded-full bg-accent px-1.5 text-xs text-white">{orders.filter((o) => o.status === "open").length}</span>
+              <span className="ml-2 rounded-full bg-accent px-1.5 text-xs text-on-accent">{orders.filter((o) => o.status === "open").length}</span>
             )}
           </button>
         ))}

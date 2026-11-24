@@ -28,16 +28,24 @@ describe("candles", () => {
 });
 
 describe("scenario events", () => {
+  it("targets groups by type and sector", () => {
+    const btc = priceAt("BTC", T + 20 * MINUTE);
+    const aapl = priceAt("AAPL", T + 20 * MINUTE);
+    setMarketEvents([{ id: "c", label: "Crypto winter", target: "type:crypto", start: T, duration: MINUTE, move: -0.3, kind: "move" }]);
+    expect(priceAt("BTC", T + 20 * MINUTE)).toBeLessThan(btc);
+    expect(priceAt("AAPL", T + 20 * MINUTE)).toBe(aapl);
+  });
+
   it("a crash moves the price down after it starts, and leaves the past alone", () => {
     const before = priceAt("AAPL", T - MINUTE);
     const normal = priceAt("AAPL", T + 20 * MINUTE);
-    setMarketEvents([{ id: "x", label: "Crash", symbol: "AAPL", start: T, duration: 10 * MINUTE, move: -0.2, kind: "move" }]);
+    setMarketEvents([{ id: "x", label: "Crash", target: "AAPL", start: T, duration: 10 * MINUTE, move: -0.2, kind: "move" }]);
     expect(priceAt("AAPL", T - MINUTE)).toBe(before);
     expect(priceAt("AAPL", T + 20 * MINUTE) / normal).toBeCloseTo(0.8, 2);
     // Other assets are untouched by a single-asset event.
     setMarketEvents([]);
     const msft = priceAt("MSFT", T + 20 * MINUTE);
-    setMarketEvents([{ id: "x", label: "Crash", symbol: "AAPL", start: T, duration: 10 * MINUTE, move: -0.2, kind: "move" }]);
+    setMarketEvents([{ id: "x", label: "Crash", target: "AAPL", start: T, duration: 10 * MINUTE, move: -0.2, kind: "move" }]);
     expect(priceAt("MSFT", T + 20 * MINUTE)).toBe(msft);
   });
 });

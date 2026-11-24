@@ -40,7 +40,8 @@ Notifications pop up when an order fills, is rejected or expires. The layout is 
 | Tool | What it's for |
 | --- | --- |
 | **Feature slots** (`src/features`) | Teams add a folder and register it; it appears on Home (`HomeWidget`), on asset pages (`AssetPanel`), in the menu (`nav`) and on every clock tick (`Runner`). Example included: price alerts |
-| **Demo controls** (`Shift + D`) | Pause, speed up (up to 1 hour per second) or jump the market clock; trigger a crash, dip, rally, spike or volatility storm for the market or one asset. A banner shows when the app isn't live |
+| **Demo controls** (`Shift + D`) | Clock: pause, speed up (presets up to 1 day per second, or a custom multiplier), step forward or jump to a date. Scenarios: presets or your own (size, duration, scheduled start, headline) for the market, an asset type, a sector or one asset, with a list of active scenarios. Account: play money, cancel orders, reset. A violet banner shows when the app isn't live |
+| **News feed** (`/news`) | Satirical headlines generated from the simulated price moves, plus BREAKING news from scenarios. Built as a feature (`src/features/news`) |
 | **Design system** (`/design`) | Colour tokens, type scale, formatting helpers, every component live, design principles, and the registered features |
 | **AGENTS.md / CLAUDE.md** | Rules and a map of the codebase for AI coding tools |
 

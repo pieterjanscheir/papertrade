@@ -101,14 +101,42 @@ function fractal(symbol: string, t: number): number {
 export interface MarketEvent {
   id: string;
   label: string;
-  /** A symbol, or "*" for the whole market (scaled by each asset's volatility). */
-  symbol: string;
+  /**
+   * Who is affected:
+   *  - "*"                 the whole market
+   *  - "type:crypto"       an asset type (stock | etf | crypto)
+   *  - "sector:Financials" a sector
+   *  - "NVDA"              a single asset
+   * Group moves are scaled by each asset's volatility (a crude "beta").
+   */
+  target: string;
   start: number;
   /** How long the move takes to play out, in ms. */
   duration: number;
   /** Size of the move, e.g. -0.15 for a 15% drop. Ignored when `kind` is "volatility". */
   move: number;
   kind: "move" | "volatility";
+  /** Optional headline for the news feed. */
+  headline?: string;
+}
+
+export function matchesTarget(target: string, a: Asset): boolean {
+  if (target === "*") return true;
+  if (target.startsWith("type:")) return a.type === target.slice(5);
+  if (target.startsWith("sector:")) return a.sector === target.slice(7);
+  return a.symbol === target;
+}
+
+/** Human label for a target, e.g. "Crypto", "Financials", "NVIDIA". */
+export function targetLabel(target: string): string {
+  if (target === "*") return "Whole market";
+  if (target.startsWith("type:")) return { stock: "All stocks", etf: "All ETFs", crypto: "All crypto" }[target.slice(5)] ?? target;
+  if (target.startsWith("sector:")) return target.slice(7);
+  return ASSETS_BY_SYMBOL[target]?.name ?? target;
+}
+
+export function eventsNow(): readonly MarketEvent[] {
+  return events;
 }
 
 let events: MarketEvent[] = [];
@@ -126,11 +154,12 @@ function beta(a: Asset) {
 function eventShift(a: Asset, t: number): number {
   let shift = 0;
   for (const e of events) {
-    if (t <= e.start || (e.symbol !== "*" && e.symbol !== a.symbol)) continue;
+    if (t <= e.start || !matchesTarget(e.target, a)) continue;
+    const single = e.target === a.symbol;
     const x = Math.min(1, (t - e.start) / e.duration);
     const eased = x * x * (3 - 2 * x);
     if (e.kind === "move") {
-      shift += Math.log(1 + e.move) * eased * (e.symbol === "*" ? beta(a) : 1);
+      shift += Math.log(1 + e.move) * eased * (single ? 1 : beta(a));
     } else if (x < 1) {
       // Volatility burst: extra fast noise that fades in and out over the window.
       const envelope = Math.sin(Math.PI * x);

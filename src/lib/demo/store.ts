@@ -24,7 +24,9 @@ interface DemoState {
   setSpeed: (speed: number) => void;
   jump: (ms: number) => void;
   goLive: () => void;
-  addEvent: (e: Omit<MarketEvent, "id" | "start">) => void;
+  /** Start a scenario now, or `delayMs` later (market time). */
+  addEvent: (e: Omit<MarketEvent, "id" | "start">, delayMs?: number) => void;
+  removeEvent: (id: string) => void;
   clearEvents: () => void;
   setPanelOpen: (open: boolean) => void;
 }
@@ -54,9 +56,12 @@ export const useDemoStore = create<DemoState>()(
       goLive() {
         set({ anchorMarket: 0, anchorReal: 0, speed: 1, events: [] });
       },
-      addEvent(e) {
-        const event: MarketEvent = { ...e, id: Math.random().toString(36).slice(2, 9), start: marketNow() };
+      addEvent(e, delayMs = 0) {
+        const event: MarketEvent = { ...e, id: Math.random().toString(36).slice(2, 9), start: marketNow() + delayMs };
         set({ events: [...get().events, event] });
+      },
+      removeEvent(id) {
+        set({ events: get().events.filter((e) => e.id !== id) });
       },
       clearEvents() {
         set({ events: [] });
@@ -66,7 +71,7 @@ export const useDemoStore = create<DemoState>()(
       },
     }),
     {
-      name: "papertrade-demo-v1",
+      name: "papertrade-demo-v2", // v2: events use `target` instead of `symbol`
       skipHydration: true,
       partialize: ({ anchorMarket, anchorReal, speed, events }) => ({ anchorMarket, anchorReal, speed, events }),
     },

@@ -30,7 +30,8 @@ function isActive(pathname: string, href: string) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   // Core navigation plus entries contributed by features (src/features).
-  const nav = [...NAV, ...enabledFeatures().flatMap((f) => (f.nav ? [f.nav] : []))];
+  const featureNav = enabledFeatures().flatMap((f) => (f.nav ? [f.nav] : []));
+  const nav = [...NAV.slice(0, -1), ...featureNav, NAV[NAV.length - 1]]; // Account stays last
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-[1600px]">

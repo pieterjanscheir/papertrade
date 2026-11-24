@@ -21,8 +21,10 @@ const COLORS = [
   { token: "line", use: "Borders, dividers", cls: "bg-line" },
   { token: "fg", use: "Primary text, primary button", cls: "bg-fg" },
   { token: "muted", use: "Secondary text, labels", cls: "bg-muted" },
-  { token: "accent", use: "Links, focus, pending things", cls: "bg-accent" },
-  { token: "accent-2", use: "Gradient partner of accent", cls: "bg-accent-2" },
+  { token: "accent", use: "Gold: brand, links, pending things", cls: "bg-accent" },
+  { token: "accent-2", use: "Deep gold, gradient partner", cls: "bg-accent-2" },
+  { token: "on-accent", use: "Text on gold backgrounds", cls: "bg-on-accent" },
+  { token: "demo", use: "Demo mode only (banner, controls)", cls: "bg-demo" },
   { token: "gain", use: "Up, profit, buy — direction only", cls: "bg-gain" },
   { token: "loss", use: "Down, loss, sell, errors", cls: "bg-loss" },
 ];

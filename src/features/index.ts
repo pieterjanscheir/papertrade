@@ -9,10 +9,12 @@
  * list, so your feature shows up without editing those screens.
  */
 
+import { news } from "./news";
 import { priceAlerts } from "./price-alerts";
 import type { Feature } from "./types";
 
 export const FEATURES: Feature[] = [
+  news,
   priceAlerts,
   // yourFeature,
 ];

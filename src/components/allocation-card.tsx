@@ -9,7 +9,7 @@ import { Card } from "./ui";
 
 type By = "asset" | "type" | "sector";
 
-const PALETTE = ["#6d7cff", "#2fd18b", "#f5a524", "#ff5d6c", "#a46bff", "#22b8cf", "#f472b6", "#94a3b8"];
+const PALETTE = ["#f5c04a", "#2fd18b", "#6d9cff", "#ff5d6c", "#b48cff", "#22b8cf", "#f472b6", "#94a3b8"];
 
 /** Donut chart of where the money is: by asset, asset type or sector. */
 export function AllocationCard({ summary }: { summary: PortfolioSummary }) {
