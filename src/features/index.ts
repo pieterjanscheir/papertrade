@@ -9,12 +9,14 @@
  * list, so your feature shows up without editing those screens.
  */
 
+import { esg } from "./esg";
 import { news } from "./news";
 import { priceAlerts } from "./price-alerts";
 import type { Feature } from "./types";
 
 export const FEATURES: Feature[] = [
   news,
+  esg,
   priceAlerts,
   // yourFeature,
 ];

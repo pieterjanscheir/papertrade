@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Newspaper, TrendingDown, TrendingUp, Minus, Smile, Siren } from "lucide-react";
+import { Leaf, Newspaper, TrendingDown, TrendingUp, Minus, Smile, Siren } from "lucide-react";
 import { Card, ChangePill, SectionTitle, EmptyState } from "@/components/ui";
 import { useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
@@ -16,6 +16,7 @@ const ICON: Record<Sentiment, typeof Newspaper> = {
   down: TrendingDown,
   flat: Minus,
   fun: Smile,
+  esg: Leaf,
   breaking: Siren,
 };
 
@@ -24,6 +25,7 @@ const ICON_STYLE: Record<Sentiment, string> = {
   down: "bg-loss/12 text-loss",
   flat: "bg-surface-2 text-muted",
   fun: "bg-accent/12 text-accent",
+  esg: "bg-gain/12 text-gain",
   breaking: "bg-loss text-white",
 };
 
@@ -149,7 +151,7 @@ export function NewsRunner({ now }: { now: number }) {
   return null;
 }
 
-type Filter = "all" | "holdings" | "watchlist" | "breaking" | "fun";
+type Filter = "all" | "holdings" | "watchlist" | "breaking" | "esg" | "fun";
 
 /** The /news page. */
 export function NewsScreen() {
@@ -168,7 +170,9 @@ export function NewsScreen() {
           ? n.symbols.some((s) => watched.has(s))
           : filter === "breaking"
             ? n.sentiment === "breaking"
-            : n.sentiment === "fun",
+            : filter === "esg"
+              ? n.sentiment === "esg"
+              : n.sentiment === "fun",
   );
 
   return (
@@ -187,6 +191,7 @@ export function NewsScreen() {
             ["holdings", "My investments"],
             ["watchlist", "Watchlist"],
             ["breaking", "Breaking"],
+            ["esg", "🌱 ESG"],
             ["fun", "Just for fun"],
           ] as const
         ).map(([f, label]) => (

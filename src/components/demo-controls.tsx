@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { CalendarClock, FastForward, Pause, Play, Radio, RotateCcw, SkipForward, Trash2, Wallet, X, Zap } from "lucide-react";
-import { ASSET_TYPE_LABEL } from "@/lib/market/assets";
+import { ASSET_TYPE_LABEL, REGION_FLAG, REGIONS } from "@/lib/market/assets";
 import { isLive, useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
 import { DAY, HOUR, MINUTE, targetLabel, type MarketEvent } from "@/lib/market/simulator";
@@ -114,6 +114,24 @@ const PRESETS: Preset[] = [
     detail: "Crypto −35% over 2 h",
     tone: "loss",
     events: () => [{ label: "Crypto winter", target: "type:crypto", move: -0.35, duration: 2 * HOUR, kind: "move", headline: "Crypto winter arrives; laser-eyed profile pictures quietly replaced with cats" }],
+  },
+  {
+    label: "Tulip mania",
+    detail: "🇳🇱 +25% over 30 min",
+    tone: "gain",
+    events: () => [{ label: "Tulip mania", target: "region:Netherlands", move: 0.25, duration: 30 * MINUTE, kind: "move", headline: "Tulip mania 2.0: Dutch stocks bloom as traders swap shares for bulbs" }],
+  },
+  {
+    label: "Waffle shortage",
+    detail: "🇧🇪 −10% over 20 min",
+    tone: "loss",
+    events: () => [{ label: "Waffle shortage", target: "region:Belgium", move: -0.1, duration: 20 * MINUTE, kind: "move", headline: "Belgian stocks slide as national waffle reserves run critically low" }],
+  },
+  {
+    label: "Autobahn rally",
+    detail: "🇩🇪 +8% in 5 min",
+    tone: "gain",
+    events: () => [{ label: "Autobahn rally", target: "region:Germany", move: 0.08, duration: 5 * MINUTE, kind: "move", headline: "German stocks rally on a stretch with no speed limit" }],
   },
   {
     label: "Bank wobble",
@@ -332,6 +350,13 @@ function TargetSelect({ value, onChange }: { value: string; onChange: (v: string
           </option>
         ))}
       </optgroup>
+      <optgroup label="Regions">
+        {REGIONS.map((r) => (
+          <option key={r} value={`region:${r}`}>
+            {REGION_FLAG[r]} {r === "Europe" ? "Rest of Europe" : r}
+          </option>
+        ))}
+      </optgroup>
       <optgroup label="Sectors">
         {sectors.map((s) => (
           <option key={s} value={`sector:${s}`}>
@@ -392,7 +417,7 @@ function ScenariosTab({ now }: { now: number }) {
             </button>
           ))}
         </div>
-        <p className="mt-2 text-[11px] text-muted">Tech selloff, Crypto winter and Bank wobble ignore the selection above.</p>
+        <p className="mt-2 text-[11px] text-muted">The last six presets have their own targets and ignore the selection above.</p>
       </Section>
 
       <Section title="Build your own">

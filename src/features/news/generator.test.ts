@@ -27,3 +27,18 @@ describe("news feed", () => {
     expect(newsFeed(T, { events, symbol: "AAPL" }).some((n) => n.sentiment === "breaking")).toBe(false);
   });
 });
+
+describe("instrument-specific news", () => {
+  it("never reports Anthropic going down", () => {
+    const items = newsFeed(T, { symbol: "ANTH", limit: 500, lookback: 60 * 86_400_000 });
+    expect(items.length).toBeGreaterThan(10);
+    expect(items.some((n) => n.sentiment === "down")).toBe(false);
+  });
+
+  it("mostly uses jokes written for the instrument itself", () => {
+    const items = newsFeed(T, { symbol: "NVDA", limit: 500, lookback: 60 * 86_400_000 });
+    const specific = items.filter((n) => n.headline.startsWith("NVIDIA"));
+    expect(specific.length / items.length).toBeGreaterThan(0.4);
+    expect(items.some((n) => n.sentiment === "esg")).toBe(true);
+  });
+});

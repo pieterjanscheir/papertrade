@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Star } from "lucide-react";
-import { ASSET_TYPE_LABEL, type AssetType } from "@/lib/market/assets";
+import { ASSET_TYPE_LABEL, REGION_FLAG, REGIONS, type AssetType, type Region } from "@/lib/market/assets";
 import { market } from "@/lib/market/provider";
 import { DAY, YEAR } from "@/lib/market/simulator";
 import { useAccount, useAccountStore } from "@/lib/trading/store";
@@ -17,7 +17,7 @@ import { AssetAvatar, Card, ChangePill, EmptyState } from "../ui";
 type Filter = "all" | "watchlist" | AssetType;
 type Sort = "name" | "gainers" | "losers" | "year";
 
-const OVERVIEW = ["VWCE", "CSPX", "EQQQ", "BTC"];
+const OVERVIEW = ["CSPX", "DAX", "AEX", "BEL20"];
 
 /** Sparkline points over the past week, every 6 hours. */
 function weekSpark(symbol: string, now: number): number[] {
@@ -32,11 +32,13 @@ export function MarketsScreen() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("name");
+  const [region, setRegion] = useState<Region | "all">("all");
 
   const q = query.trim().toLowerCase();
   const rows = market
     .listAssets()
     .filter((a) => (filter === "all" ? true : filter === "watchlist" ? account.watchlist.includes(a.symbol) : a.type === filter))
+    .filter((a) => region === "all" || a.region === region)
     .filter((a) => !q || a.name.toLowerCase().includes(q) || a.symbol.toLowerCase().includes(q) || a.sector.toLowerCase().includes(q))
     .map((a) => {
       const quote = market.quote(a.symbol, now);
@@ -109,6 +111,17 @@ export function MarketsScreen() {
         ))}
       </div>
 
+      <div className="scrollbar-none -mx-4 -mt-3 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
+        <Chip active={region === "all"} onClick={() => setRegion("all")}>
+          All regions
+        </Chip>
+        {REGIONS.map((r) => (
+          <Chip key={r} active={region === r} onClick={() => setRegion(r)}>
+            {REGION_FLAG[r]} {r === "Europe" ? "Rest of Europe" : r}
+          </Chip>
+        ))}
+      </div>
+
       <Card className="overflow-hidden">
         {rows.length === 0 ? (
           <EmptyState title="Nothing found" body={filter === "watchlist" ? "Star an asset to add it to your watchlist." : `No assets match “${query}”.`} />
@@ -117,7 +130,7 @@ export function MarketsScreen() {
             {/* Phones */}
             <div className="p-1.5 md:hidden">
               {rows.map(({ a }) => (
-                <AssetRow key={a.symbol} symbol={a.symbol} now={now} subtitle={`${a.symbol} · ${a.sector}`} />
+                <AssetRow key={a.symbol} symbol={a.symbol} now={now} subtitle={`${REGION_FLAG[a.region]} ${a.symbol} · ${a.sector}`} />
               ))}
             </div>
 
@@ -160,7 +173,7 @@ export function MarketsScreen() {
                           <span>
                             <span className="block font-semibold">{a.name}</span>
                             <span className="block text-xs text-muted">
-                              {a.symbol} · {ASSET_TYPE_LABEL[a.type].replace(/s$/, "")}
+                              {REGION_FLAG[a.region]} {a.symbol} · {ASSET_TYPE_LABEL[a.type].replace(/s$/, "")}
                             </span>
                           </span>
                         </Link>

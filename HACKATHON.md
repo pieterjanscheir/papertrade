@@ -22,7 +22,8 @@ Take five minutes to click around:
 - **Home**: portfolio value, holdings, allocation, open orders
 - **Invest**: every stock, ETF and coin
 - **An asset page**: line and candle charts, the order panel (market, limit and stop orders), and news
-- **News**: satirical headlines generated from the simulated prices (`src/features/news`, a second example feature)
+- **News**: satirical headlines generated from the simulated prices, written per instrument (`src/features/news`, a second example feature). Add your own jokes in `flavor.ts`, following the house rules at the top of the file
+- **ESG vibes** on every asset page: a comedic, made-up ESG report (`src/features/esg`, a third example)
 - **Activity**: transactions and orders
 - **For builders** (bottom of the sidebar): **Demo controls** (`Shift + D`) and the **Design system** page
 

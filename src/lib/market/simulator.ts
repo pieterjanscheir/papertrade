@@ -106,6 +106,7 @@ export interface MarketEvent {
    *  - "*"                 the whole market
    *  - "type:crypto"       an asset type (stock | etf | crypto)
    *  - "sector:Financials" a sector
+   *  - "region:Belgium"    a region (US, Germany, Netherlands, Belgium, Europe, Global, Crypto)
    *  - "NVDA"              a single asset
    * Group moves are scaled by each asset's volatility (a crude "beta").
    */
@@ -124,6 +125,7 @@ export function matchesTarget(target: string, a: Asset): boolean {
   if (target === "*") return true;
   if (target.startsWith("type:")) return a.type === target.slice(5);
   if (target.startsWith("sector:")) return a.sector === target.slice(7);
+  if (target.startsWith("region:")) return a.region === target.slice(7);
   return a.symbol === target;
 }
 
@@ -132,6 +134,7 @@ export function targetLabel(target: string): string {
   if (target === "*") return "Whole market";
   if (target.startsWith("type:")) return { stock: "All stocks", etf: "All ETFs", crypto: "All crypto" }[target.slice(5)] ?? target;
   if (target.startsWith("sector:")) return target.slice(7);
+  if (target.startsWith("region:")) return `${target.slice(7)} market`;
   return ASSETS_BY_SYMBOL[target]?.name ?? target;
 }
 
@@ -155,6 +158,7 @@ function eventShift(a: Asset, t: number): number {
   let shift = 0;
   for (const e of events) {
     if (t <= e.start || !matchesTarget(e.target, a)) continue;
+    if (a.alwaysUp && (e.kind === "volatility" || e.move < 0)) continue; // it only goes up
     const single = e.target === a.symbol;
     const x = Math.min(1, (t - e.start) / e.duration);
     const eased = x * x * (3 - 2 * x);
@@ -190,9 +194,31 @@ function requireAsset(symbol: string): Asset {
   return asset;
 }
 
+/**
+ * Up-only wiggle for `alwaysUp` assets: slow, small waves whose slope never beats the
+ * drift, so the price rises at every moment but the chart isn't a ruler-straight line.
+ * (Each octave's max slope is 3 × amplitude / period; their sum, ~0.63/yr, stays below the 0.9/yr drift.)
+ */
+const UP_ONLY_OCTAVES: ReadonlyArray<readonly [number, number]> = [
+  [180 * DAY, 0.04],
+  [30 * DAY, 0.006],
+  [3 * DAY, 0.00045],
+];
+
+function upOnlyNoise(symbol: string, t: number): number {
+  const seeds = seedsFor(symbol + ":up");
+  return UP_ONLY_OCTAVES.reduce((sum, [period, amp], k) => sum + amp * valueNoise(seeds[k], t / period), 0);
+}
+
 /** Simulated price of `symbol` at timestamp `t` (ms since epoch), in EUR. */
 export function priceAt(symbol: string, t: number): number {
   const a = requireAsset(symbol);
+  if (a.alwaysUp) {
+    // Positive scenario moves still apply; nothing can push it down.
+    const years = (t - REF_TIME) / YEAR;
+    const logP = Math.log(a.refPrice) + a.drift * years + (upOnlyNoise(symbol, t) - upOnlyNoise(symbol, REF_TIME)) + (events.length ? eventShift(a, t) : 0);
+    return roundPrice(Math.exp(logP));
+  }
   const years = (t - REF_TIME) / YEAR;
   const logP =
     Math.log(a.refPrice) +

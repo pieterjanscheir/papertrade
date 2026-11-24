@@ -27,7 +27,7 @@ npm run build
 | Screen | What it does |
 | --- | --- |
 | **Home** | Total value, scrubbable portfolio chart (1D–5Y), holdings table with return and weight, allocation donut (by asset / type / sector), open orders, watchlist, biggest movers |
-| **Invest** | Market overview cards, search, filters (watchlist, stocks, ETFs, crypto), sorting (A–Z, gainers, losers, best 1Y), a full table with 7-day sparklines on wide screens |
+| **Invest** | 62 instruments: US, German, Dutch and Belgian stocks, DAX/AEX/BEL 20 and global ETFs, crypto, plus a fictional always-up Anthropic listing. Overview cards, search, type and region filters, sorting (A–Z, gainers, losers, best 1Y), a full table with 7-day sparklines on wide screens |
 | **Asset** | Live price; line chart or **candlesticks with volume and MA 20/50**, price axis and OHLC crosshair; lines for your average cost and open orders; position, stats, about, order history, trades |
 | **Order panel** | **Market, limit and stop orders**, buy or sell by EUR amount or units, fractional shares, expiry (1 day, 1 week, 1 month, until cancelled), €1 flat fee, live estimate. Docked next to the chart on desktop, a bottom sheet on mobile |
 | **Activity** | Transactions grouped by day, plus an Orders tab (open, filled, cancelled, expired, rejected) |
@@ -41,7 +41,8 @@ Notifications pop up when an order fills, is rejected or expires. The layout is 
 | --- | --- |
 | **Feature slots** (`src/features`) | Teams add a folder and register it; it appears on Home (`HomeWidget`), on asset pages (`AssetPanel`), in the menu (`nav`) and on every clock tick (`Runner`). Example included: price alerts |
 | **Demo controls** (`Shift + D`) | Clock: pause, speed up (presets up to 1 day per second, or a custom multiplier), step forward or jump to a date. Scenarios: presets or your own (size, duration, scheduled start, headline) for the market, an asset type, a sector or one asset, with a list of active scenarios. Account: play money, cancel orders, reset. A violet banner shows when the app isn't live |
-| **News feed** (`/news`) | Satirical headlines generated from the simulated price moves, plus BREAKING news from scenarios. Built as a feature (`src/features/news`) |
+| **News feed** (`/news`) | Satirical headlines generated from the simulated price moves: jokes written per instrument and per sector (`src/features/news/flavor.ts`), ESG stories, and BREAKING news from scenarios |
+| **ESG vibes** | A comedic, entirely made-up ESG report per asset (plants, cake, meetings) and a portfolio score on Home (`src/features/esg`) |
 | **Design system** (`/design`) | Colour tokens, type scale, formatting helpers, every component live, design principles, and the registered features |
 | **AGENTS.md / CLAUDE.md** | Rules and a map of the codebase for AI coding tools |
 

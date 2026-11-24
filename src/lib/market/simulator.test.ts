@@ -49,3 +49,32 @@ describe("scenario events", () => {
     expect(priceAt("MSFT", T + 20 * MINUTE)).toBe(msft);
   });
 });
+
+describe("Anthropic (fictional, always up)", () => {
+  it("never goes down, at any time scale", () => {
+    for (const step of [5 * MINUTE, 60 * MINUTE, 24 * 60 * MINUTE]) {
+      let prev = priceAt("ANTH", T - 400 * step);
+      for (let i = -399; i <= 400; i++) {
+        const p = priceAt("ANTH", T + i * step);
+        expect(p).toBeGreaterThanOrEqual(prev);
+        prev = p;
+      }
+    }
+  });
+
+  it("ignores crashes but enjoys rallies", () => {
+    const base = priceAt("ANTH", T + 20 * MINUTE);
+    setMarketEvents([{ id: "c", label: "Crash", target: "*", start: T, duration: MINUTE, move: -0.5, kind: "move" }]);
+    expect(priceAt("ANTH", T + 20 * MINUTE)).toBe(base);
+    setMarketEvents([{ id: "r", label: "Rally", target: "*", start: T, duration: MINUTE, move: 0.1, kind: "move" }]);
+    expect(priceAt("ANTH", T + 20 * MINUTE)).toBeGreaterThan(base);
+  });
+
+  it("region targets hit only that region", () => {
+    const kbc = priceAt("KBC", T + 20 * MINUTE);
+    const sap = priceAt("SAP", T + 20 * MINUTE);
+    setMarketEvents([{ id: "b", label: "Waffle shock", target: "region:Belgium", start: T, duration: MINUTE, move: -0.2, kind: "move" }]);
+    expect(priceAt("KBC", T + 20 * MINUTE)).toBeLessThan(kbc);
+    expect(priceAt("SAP", T + 20 * MINUTE)).toBe(sap);
+  });
+});

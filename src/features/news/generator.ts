@@ -12,8 +12,9 @@
 import { ASSETS, type Asset } from "@/lib/market/assets";
 import { market } from "@/lib/market/provider";
 import { HOUR, YEAR, matchesTarget, targetLabel, type MarketEvent } from "@/lib/market/simulator";
+import { ASSET_QUIPS, SECTOR_QUIPS } from "./flavor";
 
-export type Sentiment = "up" | "down" | "flat" | "fun" | "breaking";
+export type Sentiment = "up" | "down" | "flat" | "fun" | "esg" | "breaking";
 
 export interface NewsItem {
   id: string;
@@ -84,6 +85,35 @@ const ETF = [
   "{name} {dir} {pct}. Passive investors remain heroically passive",
   "{name} {dir} {pct}; its holders were reportedly busy living their lives",
 ];
+// ESG, but make it funny. Gentle, about office life, never accusing anyone of greenwashing.
+const ESG = [
+  "{name} lifts its ESG score by switching the office lights off on Fridays, as suggested by Gerald from facilities",
+  "{name} publishes a 400-page sustainability report, praised mostly for the recycled paper",
+  "Rating agency trims {name}'s Governance score after a board meeting overruns by three minutes",
+  "{name} plants one tree per employee; the trees are reportedly “doing great, thanks for asking”",
+  "{name} wins the “Most Sustainable Font” award for its annual report",
+  "{name}'s new Social pledge: replying to emails within the same quarter",
+  "{name} cuts emissions by banning reply-all, saving an estimated 4 tonnes of passive-aggression",
+  "{name} achieves a carbon-neutral coffee break; tea drinkers demand equal treatment",
+  "ESG analysts praise {name} for finally fixing the dripping tap in the third-floor kitchen",
+  "{name} swaps plastic office plants for real ones; three survive the first week",
+  "{name} boosts its “S” score with a second birthday cake per month",
+  "{name} adds a QR code to its sustainability policy; nobody scans it, but the score goes up",
+];
+const ESG_CRYPTO = [
+  "{name} pledges to go green by mining only on sunny days",
+  "{name} community proposes its own ESG framework: Everyone Stays Gleeful",
+  "{name} offsets its footprint by holders promising to “touch grass” once a week",
+];
+const ESG_ETF = [
+  "{name} discovers it holds “a bit of everything”; ESG score lands at “a bit of everything”",
+  "{name} ESG review finds the fund is 2% kale, analysts unsure how",
+];
+const ESG_ANTH = [
+  "Anthropic's ESG rating goes up as well, because of course it does",
+  "Anthropic publishes ESG report; it is helpful, harmless and honestly quite long",
+];
+
 const MARKET_QUIPS = [
   "Markets close mixed, which experts confirm is “one of the outcomes”",
   "Survey: 9 in 10 traders would rather check prices than eat lunch",
@@ -97,6 +127,12 @@ const MARKET_QUIPS = [
   "Trader replaces morning coffee with checking red and green numbers, reports “same effect”",
   "Area man explains compound interest at party, party continues without him",
   "Central bankers hold surprise meeting; agenda turns out to be the coffee rota",
+  "Trader asks AI for a stock tip; AI asks trader about their risk tolerance, trader logs off",
+  "Day traders announce four-day week; the market does not notice",
+  "“Past performance is no guarantee of future results”, says man about his football team",
+  "Investor diversifies portfolio by buying the same ETF in a different app",
+  "European markets open; Belgian, Dutch and German traders debate the best lunch for 40 minutes",
+  "New study: traders who say “to the moon” have mostly never left their desk",
 ];
 
 function hash(s: string): number {
@@ -118,7 +154,8 @@ function fill(template: string, a: Asset | null, move: number) {
     .replaceAll("{sector}", a?.sector ?? "")
     .replaceAll("{pct}", `${Math.abs(move * 100).toFixed(1)}%`)
     .replaceAll("{dir}", up ? "rises" : "falls")
-    .replaceAll("{laser}", up ? "make a comeback" : "quietly swapped for cats");
+    .replaceAll("{laser}", up ? "make a comeback" : "quietly swapped for cats")
+    .replaceAll("{color}", up ? "green" : "red");
 }
 
 // ---------------------------------------------------------------------------
@@ -141,9 +178,29 @@ function assetStories(a: Asset, from: number, to: number): NewsItem[] {
     const typical = a.volatility * Math.sqrt(MOVE_WINDOW / YEAR);
     const z = move / typical;
 
-    let pool = z > 1.3 ? BIG_UP : z > 0.35 ? UP : z < -1.3 ? BIG_DOWN : z < -0.35 ? DOWN : FLAT;
-    if (pool !== FLAT && a.type === "crypto" && hash(key + "c") % 2 === 0) pool = CRYPTO;
-    if (pool !== FLAT && a.type === "etf" && hash(key + "e") % 2 === 0) pool = ETF;
+    // Which kind of story? Mostly jokes written for this exact instrument.
+    const roll = hash(key + "kind") % 100;
+    const quips = ASSET_QUIPS[a.symbol];
+    const sectorQuips = SECTOR_QUIPS[a.sector];
+    const flat = Math.abs(z) <= 0.35;
+    let pool: string[];
+    let sentiment: Sentiment;
+
+    if (roll < 14) {
+      pool = a.alwaysUp ? ESG_ANTH : a.type === "crypto" ? ESG_CRYPTO : a.type === "etf" && hash(key + "e") % 2 ? ESG_ETF : ESG;
+      sentiment = "esg";
+    } else if (quips && (roll < 66 || a.alwaysUp)) {
+      pool = [...(move >= 0 ? quips.up : quips.down), ...(quips.any ?? [])];
+      sentiment = move >= 0 ? "up" : "down";
+    } else if (sectorQuips && !flat && roll < 80) {
+      pool = sectorQuips;
+      sentiment = move >= 0 ? "up" : "down";
+    } else {
+      pool = z > 1.3 ? BIG_UP : z > 0.35 ? UP : z < -1.3 ? BIG_DOWN : z < -0.35 ? DOWN : FLAT;
+      if (pool !== FLAT && a.type === "crypto" && hash(key + "c") % 2 === 0) pool = CRYPTO;
+      if (pool !== FLAT && a.type === "etf" && hash(key + "e") % 2 === 0) pool = ETF;
+      sentiment = pool === FLAT ? "flat" : move >= 0 ? "up" : "down";
+    }
 
     items.push({
       id: `a:${key}`,
@@ -151,7 +208,7 @@ function assetStories(a: Asset, from: number, to: number): NewsItem[] {
       headline: fill(pick(pool, key + "t"), a, move),
       source: pick(SOURCES, key + "s"),
       symbols: [a.symbol],
-      sentiment: pool === FLAT ? "flat" : move >= 0 ? "up" : "down",
+      sentiment,
       move,
     });
   }
