@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { usePref } from "@/lib/ui/prefs";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Leaf, Newspaper, TrendingDown, TrendingUp, Minus, Smile, Siren } from "lucide-react";
 import { Card, ChangePill, SectionTitle, EmptyState } from "@/components/ui";
@@ -157,7 +158,7 @@ type Filter = "all" | "holdings" | "watchlist" | "breaking" | "esg" | "fun";
 export function NewsScreen() {
   const now = useNow();
   const account = useAccount();
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = usePref<Filter>("news.filter", "all");
   const items = useFeed(now, { limit: 200, lookback: 4 * 86_400_000 });
   const held = new Set(Object.keys(account.positions));
   const watched = new Set(account.watchlist);

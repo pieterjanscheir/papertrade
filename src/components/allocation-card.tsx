@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { usePref } from "@/lib/ui/prefs";
+
 import { ASSET_TYPE_LABEL } from "@/lib/market/assets";
 import { market } from "@/lib/market/provider";
 import type { PortfolioSummary } from "@/lib/trading/engine";
@@ -13,7 +14,7 @@ const PALETTE = ["#f5c04a", "#2fd18b", "#6d9cff", "#ff5d6c", "#b48cff", "#22b8cf
 
 /** Donut chart of where the money is: by asset, asset type or sector. */
 export function AllocationCard({ summary }: { summary: PortfolioSummary }) {
-  const [by, setBy] = useState<By>("asset");
+  const [by, setBy] = usePref<By>("home.allocationBy", "asset");
 
   const buckets = new Map<string, number>();
   for (const h of summary.holdings) {

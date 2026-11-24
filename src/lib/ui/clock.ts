@@ -10,7 +10,7 @@ import { marketNow, useDemoStore } from "../demo/store";
  * `now` is market time (see lib/demo/store.ts): normally real time, but demo
  * controls can speed it up, pause it or jump ahead.
  */
-export const TICK_MS = 2_000;
+export const TICK_MS = 1_000;
 
 let now = 0;
 let realAtTick = 0;
@@ -50,6 +50,21 @@ function getSnapshot() {
 /** How far market time is from real time, as of the last tick (ms). */
 export function clockOffset(): number {
   return realAtTick ? now - realAtTick : 0;
+}
+
+/**
+ * A smoother clock for displays of the time itself (e.g. the demo panel): updates
+ * several times a second, reading market time directly.
+ */
+export function useLiveTime(intervalMs = 250): number {
+  return useSyncExternalStore(
+    (cb) => {
+      const id = setInterval(cb, intervalMs);
+      return () => clearInterval(id);
+    },
+    () => Math.floor(marketNow() / intervalMs) * intervalMs,
+    () => 0,
+  );
 }
 
 export function useNow(): number {

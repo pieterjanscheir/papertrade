@@ -12,7 +12,7 @@ import { contractLabel, parseContract } from "@/lib/market/options";
 import { money, price, qty, signedMoney } from "@/lib/ui/format";
 import { toast } from "@/lib/ui/toasts";
 import { DemoControls } from "./demo-controls";
-import { Logo } from "./logo";
+import { Coin3D } from "./tilt";
 import { Toaster } from "./toaster";
 
 /**
@@ -44,9 +44,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <>
       {!ready && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-bg">
-          <div className="animate-pulse">
-            <Logo size={44} />
-          </div>
+          <Coin3D size={64} label="€" />
         </div>
       )}
       {ready && <OrderProcessor />}

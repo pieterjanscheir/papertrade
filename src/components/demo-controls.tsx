@@ -1,15 +1,17 @@
 "use client";
 
+import { usePref } from "@/lib/ui/prefs";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { CalendarClock, FastForward, Pause, Play, Radio, RotateCcw, SkipForward, Trash2, Wallet, X, Zap } from "lucide-react";
+import { CalendarClock, FastForward, Pause, Play, Radio, SkipForward, Trash2, Wallet, X, Zap } from "lucide-react";
 import { ASSET_TYPE_LABEL, REGION_FLAG, REGIONS } from "@/lib/market/assets";
 import { isLive, useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
 import { DAY, HOUR, MINUTE, targetLabel, type MarketEvent } from "@/lib/market/simulator";
 import { openOrders } from "@/lib/trading/orders";
+import { PRESETS as ACCOUNT_PRESETS, type PresetId } from "@/lib/trading/seed";
 import { useAccount, useAccountStore } from "@/lib/trading/store";
-import { clockOffset, useNow } from "@/lib/ui/clock";
+import { clockOffset, useLiveTime, useNow } from "@/lib/ui/clock";
 import { money, pct } from "@/lib/ui/format";
 import { toast } from "@/lib/ui/toasts";
 
@@ -176,8 +178,10 @@ export function DemoControls() {
 
 function Panel({ onClose }: { onClose: () => void }) {
   const now = useNow();
+  // The big clock in the header ticks smoothly, independent of the app's 1s tick.
+  const shownTime = useLiveTime(200);
   const demo = useDemoStore();
-  const [tab, setTab] = useState<Tab>("scenarios");
+  const [tab, setTab] = usePref<Tab>("demo.tab", "scenarios");
   const live = isLive(demo);
   const offset = clockOffset();
   const status = demo.speed === 0 ? "Paused" : live ? "Live" : "Demo";
@@ -199,10 +203,10 @@ function Panel({ onClose }: { onClose: () => void }) {
               </span>
             </p>
             <p className="tabular mt-2 text-2xl font-semibold tracking-tight">
-              {new Date(now).toLocaleTimeString("en-IE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+              {new Date(shownTime || now).toLocaleTimeString("en-IE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </p>
             <p className="tabular text-xs text-muted">
-              {new Date(now).toLocaleDateString("en-IE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+              {new Date(shownTime || now).toLocaleDateString("en-IE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
               {Math.abs(offset) > 60_000 && <span className="text-demo"> · {formatOffset(offset)} vs real time</span>}
             </p>
           </div>
@@ -403,12 +407,12 @@ function ScenariosTab({ now }: { now: number }) {
       </Section>
 
       <Section title="Quick scenarios" note="Each one also posts a BREAKING headline in the news feed.">
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
           {PRESETS.map((p) => (
             <button
               key={p.label}
               onClick={() => p.events(target).forEach((e) => demo.addEvent(e))}
-              className="rounded-xl border border-line px-2.5 py-2 text-left transition hover:bg-surface-2"
+              className="min-w-0 rounded-xl border border-line px-3 py-2.5 text-left transition hover:bg-surface-2"
             >
               <span className={`block text-[13px] font-semibold ${p.tone === "loss" ? "text-loss" : p.tone === "gain" ? "text-gain" : "text-accent"}`}>
                 {p.label}
@@ -538,7 +542,7 @@ function ScenariosTab({ now }: { now: number }) {
 function AccountTab({ now }: { now: number }) {
   const account = useAccount();
   const store = useAccountStore();
-  const [confirm, setConfirm] = useState<"demo" | "fresh" | null>(null);
+  const [confirm, setConfirm] = useState<PresetId | null>(null);
   const open = openOrders(account);
   const invested = Object.values(account.positions).reduce((s, p) => s + p.quantity * market.priceAt(p.symbol, now), 0);
 
@@ -579,23 +583,24 @@ function AccountTab({ now }: { now: number }) {
         </button>
       </Section>
 
-      <Section title="Start over" note="Wipes positions and history in this browser.">
+      <Section title="Load an account" note="Replaces positions and history in this browser.">
         <div className="grid grid-cols-2 gap-1.5">
-          {(["demo", "fresh"] as const).map((k) => (
+          {ACCOUNT_PRESETS.map((p) => (
             <button
-              key={k}
+              key={p.id}
               onClick={() => {
-                if (confirm !== k) return setConfirm(k);
-                store.reset(k);
+                if (confirm !== p.id) return setConfirm(p.id);
+                store.reset(p.id);
                 setConfirm(null);
-                toast({ title: k === "demo" ? "Demo portfolio restored" : "Fresh €10,000 account", tone: "neutral" });
+                toast({ title: `Loaded “${p.name}”`, body: p.description, tone: "neutral" });
               }}
-              className={`flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold ${
-                confirm === k ? "bg-loss text-white" : "bg-surface-2 text-muted hover:text-fg"
+              title={p.description}
+              className={`flex min-w-0 items-center gap-1.5 rounded-xl px-2.5 py-2 text-left text-xs font-semibold ${
+                confirm === p.id ? "bg-loss text-white" : "bg-surface-2 text-muted hover:text-fg"
               }`}
             >
-              <RotateCcw size={13} />
-              {confirm === k ? "Click again to confirm" : k === "demo" ? "Demo portfolio" : "Empty account"}
+              <span className="text-base">{p.emoji}</span>
+              <span className="truncate">{confirm === p.id ? "Click again to load" : p.name}</span>
             </button>
           ))}
         </div>

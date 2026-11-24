@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Palette, RotateCcw, Sparkles, Zap } from "lucide-react";
+import { Palette, Zap } from "lucide-react";
 import { useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
 import { ORDER_FEE } from "@/lib/trading/engine";
-import { STARTING_CASH } from "@/lib/trading/seed";
+import { PRESETS } from "@/lib/trading/seed";
 import { useAccount, useAccountStore, type StartKind } from "@/lib/trading/store";
 import { money } from "@/lib/ui/format";
-import { Logo } from "../logo";
+import { PlayCard } from "../play-card";
+import { Tilt } from "../tilt";
 import { MoneySheet, type MoneyAction } from "../money-sheet";
 import { Sheet } from "../sheet";
 import { Button, Card, SectionTitle } from "../ui";
@@ -25,13 +26,14 @@ export function AccountScreen() {
     <div className="mx-auto flex max-w-3xl flex-col gap-7">
       <h1 className="text-3xl font-semibold tracking-tight">Account</h1>
 
-      <Card className="flex items-center gap-4 p-5">
-        <Logo size={48} />
-        <div className="flex-1">
+      <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-6">
+        <PlayCard balance={account.cash} />
+        <div className="text-center sm:text-left">
           <p className="font-semibold">Paper trading account</p>
           <p className="text-sm text-muted">Cash balance {money(account.cash)}</p>
+          <p className="mt-1 text-xs text-muted">Tip: click the card.</p>
         </div>
-      </Card>
+      </div>
 
       <div>
         <SectionTitle>Cash</SectionTitle>
@@ -46,21 +48,23 @@ export function AccountScreen() {
       </div>
 
       <div>
-        <SectionTitle>Start over</SectionTitle>
-        <Card className="divide-y divide-line">
-          <ResetRow
-            icon={<Sparkles size={18} />}
-            title="Demo portfolio"
-            body="About 7 months of trading history, so every chart has something to show."
-            onClick={() => setConfirm("demo")}
-          />
-          <ResetRow
-            icon={<RotateCcw size={18} />}
-            title="Empty account"
-            body={`Start from scratch with ${money(STARTING_CASH)} in cash.`}
-            onClick={() => setConfirm("fresh")}
-          />
-        </Card>
+        <SectionTitle>Load a different account</SectionTitle>
+        <p className="-mt-2 mb-3 px-1 text-sm text-muted">
+          Each one comes with a full trading history built from the simulated prices. Handy for demos and user tests.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {PRESETS.map((p) => (
+            <Tilt key={p.id} max={6}>
+              <button onClick={() => setConfirm(p.id)} className="flex h-full w-full items-start gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-4 text-left">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface-2 text-2xl">{p.emoji}</span>
+                <span>
+                  <span className="block font-semibold">{p.name}</span>
+                  <span className="block text-sm text-muted">{p.description}</span>
+                </span>
+              </button>
+            </Tilt>
+          ))}
+        </div>
       </div>
 
       <div>
@@ -95,7 +99,7 @@ export function AccountScreen() {
 
       <Sheet open={confirm !== null} onClose={() => setConfirm(null)} title="Reset account?">
         <p className="mb-5 text-sm text-muted">
-          This wipes your positions and history and starts a {confirm === "demo" ? "new demo portfolio" : "fresh empty account"}.
+          This replaces your positions and history with “{PRESETS.find((p) => p.id === confirm)?.name}”.
         </p>
         <div className="flex gap-3">
           <Button variant="secondary" className="flex-1" onClick={() => setConfirm(null)}>
@@ -114,17 +118,5 @@ export function AccountScreen() {
         </div>
       </Sheet>
     </div>
-  );
-}
-
-function ResetRow({ icon, title, body, onClick }: { icon: React.ReactNode; title: string; body: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="flex w-full items-center gap-4 px-5 py-4 text-left transition hover:bg-surface-2">
-      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-2">{icon}</span>
-      <span className="flex-1">
-        <span className="block font-semibold">{title}</span>
-        <span className="block text-sm text-muted">{body}</span>
-      </span>
-    </button>
   );
 }

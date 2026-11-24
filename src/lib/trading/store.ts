@@ -30,7 +30,7 @@ import {
   type OrderEvent,
   type PendingOrderRequest,
 } from "./orders";
-import { createDemoAccount, createFreshAccount } from "./seed";
+import { createPresetAccount, type PresetId } from "./seed";
 import { multiplier, parseContract, quoteOption } from "../market/options";
 import {
   executeOptionOrder,
@@ -40,7 +40,7 @@ import {
 } from "./options-trading";
 import type { Order } from "./engine";
 
-export type StartKind = "demo" | "fresh";
+export type StartKind = PresetId;
 
 interface AccountStore {
   account: AccountState | null;
@@ -148,9 +148,7 @@ export const useAccountStore = create<AccountStore>()(
 
       reset(kind) {
         const now = marketNow();
-        set({
-          account: kind === "demo" ? createDemoAccount(now, market.priceAt) : createFreshAccount(now),
-        });
+        set({ account: createPresetAccount(kind, now, market.priceAt) });
       },
     }),
     {

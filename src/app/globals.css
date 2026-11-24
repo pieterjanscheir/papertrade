@@ -102,3 +102,38 @@ dialog::backdrop {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* 3D coin spin */
+@keyframes coin-spin {
+  from {
+    transform: rotateY(0deg) rotateX(12deg);
+  }
+  to {
+    transform: rotateY(360deg) rotateX(12deg);
+  }
+}
+.coin-spin {
+  animation: coin-spin 6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coin-spin {
+    animation: none;
+  }
+}
+
+/* 3D card flip */
+.flip-card {
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.flip-card[data-flipped="true"] {
+  transform: rotateY(180deg);
+}
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(0deg) translateZ(0.1px);
+}
+.flip-face.flip-back {
+  transform: rotateY(180deg) translateZ(0.1px);
+}

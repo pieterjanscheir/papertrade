@@ -33,7 +33,9 @@ npm run build
 | **Options** | On every asset page: an options chain (calls/puts, bid/ask, delta, 7 expiries), buy to open / sell to close, payoff chart, breakeven, time decay. European-style, cash-settled at expiry, priced with Black-Scholes on the simulated prices |
 | **Learn** (`/learn`) | Lessons on basics, orders, options and mindset, each with a joke “video” that never plays and real notes underneath, plus quizzes and progress. Somewhere in the masterclass is a case study that is not what it seems |
 | **Activity** | Transactions grouped by day, plus an Orders tab (open, filled, cancelled, expired, rejected) |
-| **Account** | Add or withdraw play money, reset to the demo or an empty account |
+| **Account** | A 3D flippable play-money card, add or withdraw cash, and preset accounts to load: Demo, Empty, **The Panic Seller** (buys tops, sells bottoms), **The Oracle** (the opposite), **The Day Trader** (500+ trades, fees galore), **Diamond Hands**, **The Boring Index Investor** and **The Options Gambler**, each with a history generated from the simulated prices |
+
+Every table (holdings, markets, options chain) scrolls sideways, sorts, filters and switches to a card view. All of it, plus chart settings, filters and the demo clock, is saved in localStorage. Cards tilt in 3D on hover.
 
 Notifications pop up when an order fills, is rejected or expires. The layout is responsive: a bottom tab bar on phones; a sidebar, two-column dashboards and tables on desktop. The UI also scales up slightly on very large screens.
 

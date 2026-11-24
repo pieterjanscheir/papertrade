@@ -331,6 +331,102 @@ export const ASSET_QUIPS: Record<string, Quips> = {
     up: ["Colruyt up {pct}; prices low, shares less so", "Colruyt gains {pct} after a perfectly packed shopping bag"],
     down: ["Colruyt dips {pct}; the till receipt was very long", "Colruyt slips {pct} as somebody forgets their shopping list"],
   },
+  BMW: {
+    up: ["BMW up {pct}; the stock indicates before overtaking, analysts stunned", "BMW gains {pct} with the sheer driving pleasure of a green candle"],
+    down: ["BMW dips {pct}; parked in two spots at once", "BMW slips {pct} after the indicator stops working, as foretold"],
+  },
+  VOW3: {
+    up: ["Volkswagen up {pct}; 10 brands agree on something for a change", "Volkswagen gains {pct} as the Beetle-shaped chart finds its feet"],
+    down: ["Volkswagen dips {pct}; the meeting to align all the brands is still going", "Volkswagen slips {pct} while the sat-nav recalculates"],
+  },
+  DHL: {
+    up: ["DHL up {pct}; the gains were delivered while you were out", "DHL gains {pct}, signed for by a neighbour"],
+    down: ["DHL dips {pct}; we tried to deliver your profits but nobody was home", "DHL slips {pct}; parcel left “in a safe place”, location unknown"],
+  },
+  MUV2: {
+    up: ["Munich Re up {pct}; insurance for insurers feeling very reassured", "Munich Re gains {pct} as somebody reinsures the reinsurance"],
+    down: ["Munich Re dips {pct}; risk was taken, then re-taken", "Munich Re slips {pct} after a very long spreadsheet about rain"],
+  },
+  ZAL: {
+    up: ["Zalando up {pct}; investors scream with joy, as the advert taught them", "Zalando gains {pct} after a shoe fits on the first try"],
+    down: ["Zalando dips {pct}; 40% of the gains were returned free of charge", "Zalando slips {pct} after three sizes are ordered and two sent back"],
+  },
+  EOAN: {
+    up: ["E.ON up {pct}; the meter spins in the right direction", "E.ON gains {pct} as somebody finally switches the heating off when leaving"],
+    down: ["E.ON dips {pct}; a phone charger left plugged in all weekend", "E.ON slips {pct} on a low-wattage afternoon"],
+  },
+  HEN3: {
+    up: ["Henkel up {pct}; the gains stick, as advertised", "Henkel gains {pct}; analysts call it “sticky growth”"],
+    down: ["Henkel dips {pct}; the glue needs 24 hours to set", "Henkel slips {pct} after the laundry comes out pink"],
+  },
+  BAYN: {
+    up: ["Bayer up {pct}; headache over, for now", "Bayer gains {pct} as the crop of buyers comes in"],
+    down: ["Bayer dips {pct}; investors reach for the medicine cabinet", "Bayer slips {pct} on a cloudy day for crops"],
+  },
+  PRX: {
+    up: ["Prosus up {pct}; owning bits of the internet pays off, again", "Prosus gains {pct} after a stake in a stake in a stake does well"],
+    down: ["Prosus dips {pct}; the internet is having an off day", "Prosus slips {pct} as the org chart gets another arrow"],
+  },
+  WKL: {
+    up: ["Wolters Kluwer up {pct}; tax season, but make it profitable", "Wolters Kluwer gains {pct}, footnoted and fully referenced"],
+    down: ["Wolters Kluwer dips {pct}; somebody skipped the appendix", "Wolters Kluwer slips {pct} pending a review of the review"],
+  },
+  ASM: {
+    up: ["ASM International up {pct}; layers deposited, gains deposited", "ASM International gains {pct}, one atom at a time"],
+    down: ["ASM International dips {pct}; the layer was a single atom too thin", "ASM International slips {pct}; deposition is a slow art"],
+  },
+  BESI: {
+    up: ["BE Semiconductor up {pct}; chips packed, gains bonded", "BESI gains {pct} as the hybrid bonding forms a hybrid bond with investors"],
+    down: ["BESI dips {pct}; bubble wrap shortage suspected", "BESI slips {pct} after a chip is put in upside down, briefly"],
+  },
+  KPN: {
+    up: ["KPN up {pct}; the Wi-Fi works upstairs too", "KPN gains {pct} with four bars in the polder"],
+    down: ["KPN dips {pct}; the router is being turned off and on again", "KPN slips {pct} after a call drops in a tunnel under the IJ"],
+  },
+  NN: {
+    up: ["NN Group up {pct}; pensions looking pensively happy", "NN Group gains {pct} for your 80-year-old self"],
+    down: ["NN Group dips {pct}; future-you shrugs, it's a long game", "NN Group slips {pct}; actuaries remain calm, statistically"],
+  },
+  RAND: {
+    up: ["Randstad up {pct}; hiring the right people pays", "Randstad gains {pct} as a temp becomes permanently profitable"],
+    down: ["Randstad dips {pct}; the stock is between jobs", "Randstad slips {pct}; CV updated, interviews scheduled"],
+  },
+  UMG: {
+    up: ["Universal Music up {pct}; the chart climbs the charts", "Universal Music gains {pct} on a catchy chorus"],
+    down: ["Universal Music dips {pct}; the B-side didn't land", "Universal Music slips {pct}; the remix nobody asked for"],
+  },
+  LOTB: {
+    up: ["Lotus Bakeries up {pct}; every coffee in Europe gets its little biscuit", "Lotus Bakeries gains {pct}; at this share price, the biscuit is the cheap part"],
+    down: ["Lotus Bakeries dips {pct}; someone ate the biscuit before the coffee arrived", "Lotus Bakeries slips {pct} after the coffee comes without a biscuit"],
+  },
+  UMI: {
+    up: ["Umicore up {pct}; recycled metals, recycled optimism", "Umicore gains {pct} as batteries recharge investor moods"],
+    down: ["Umicore dips {pct}; battery at 12%, please connect a charger", "Umicore slips {pct}; the catalyst didn't catalyse"],
+  },
+  PROX: {
+    up: ["Proximus up {pct}; signal found behind the sofa", "Proximus gains {pct} as Belgian Wi-Fi reaches the garden"],
+    down: ["Proximus dips {pct}; buffering…", "Proximus slips {pct} while the technician arrives between 8:00 and 18:00"],
+  },
+  GBLB: {
+    up: ["GBL up {pct}; holding companies holding up nicely", "GBL gains {pct} as its stakes enjoy a good steak dinner"],
+    down: ["GBL dips {pct}; holding steady, slightly less", "GBL slips {pct} as one of its holdings has an off day"],
+  },
+  ARGX: {
+    up: ["argenx up {pct}; Ghent lab celebrates with a coffee that's actually hot", "argenx gains {pct} after a very long and very careful meeting"],
+    down: ["argenx dips {pct}; the lab's coffee machine is on strike", "argenx slips {pct} on a grey Ghent afternoon"],
+  },
+  BAR: {
+    up: ["Barco up {pct}; the projector works on the first try", "Barco gains {pct}, displayed in glorious 4K"],
+    down: ["Barco dips {pct}; nobody can find the right HDMI adapter", "Barco slips {pct} as the presenter says “can everyone see my screen?”"],
+  },
+  MELE: {
+    up: ["Melexis up {pct}; sensors detect gains", "Melexis gains {pct}, measured to the millivolt"],
+    down: ["Melexis dips {pct}; sensor reports “mild disappointment”", "Melexis slips {pct} after a calibration nap"],
+  },
+  BPOST: {
+    up: ["bpost up {pct}; the letter arrived the same week", "bpost gains {pct}, delivered with a hand-written note"],
+    down: ["bpost dips {pct}; your profits will be delivered between Monday and later", "bpost slips {pct}; card left: “sorry we missed you”"],
+  },
   BEL20: {
     up: ["BEL 20 ETF up {pct}; 20 Belgian companies celebrate with fries and a compromise", "BEL 20 ETF gains {pct}; all three language communities agree for once"],
     down: ["BEL 20 ETF dips {pct}; it rained, it's Belgium", "BEL 20 ETF slips {pct} while a government is still being formed"],

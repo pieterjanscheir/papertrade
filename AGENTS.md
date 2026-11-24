@@ -34,6 +34,10 @@ Before saying a change is done: `npm run typecheck && npm run lint && npm test`.
 | A new page | `src/app/<route>/page.tsx` (server file, renders a client component from your feature folder) |
 | State that survives reloads | `createLocalStore(name, …)` from `src/lib/local-store.ts` |
 | A notification | `toast({ title, body, tone, href })` from `src/lib/ui/toasts.ts` |
+| A table | `DataTable` from `src/components/data-table.tsx`: scrolling, sticky first column, sort, search, filter chips and a card view, all remembered per `id` |
+| A remembered UI setting | `usePref(key, default)` from `src/lib/ui/prefs.ts` (like `useState`, saved in localStorage) |
+| 3D / motion | `Tilt`, `Coin3D` from `src/components/tilt.tsx`, `PlayCard` from `src/components/play-card.tsx` |
+| A preset account | `PRESETS` / `createPresetAccount` in `src/lib/trading/seed.ts` |
 | Trading rules (orders, fees, P/L) | `src/lib/trading/engine.ts` and `orders.ts`: pure functions, add tests next to them |
 | Prices, candles, assets | Read through `market` from `src/lib/market/provider.ts`. Assets are in `src/lib/market/assets.ts` |
 | Options | Pricing/contracts: `src/lib/market/options.ts`. Trading/settlement: `src/lib/trading/options-trading.ts`. Portfolio totals incl. options: `portfolioSummary` / `portfolioHistory` from `src/lib/trading/portfolio.ts` |

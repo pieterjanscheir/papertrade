@@ -1,5 +1,6 @@
 "use client";
 
+import { usePref } from "@/lib/ui/prefs";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpFromLine, Compass, History, Plus } from "lucide-react";
@@ -26,7 +27,7 @@ export function HomeScreen() {
   const now = useNow();
   const wide = useIsWide();
   const account = useAccount();
-  const [range, setRange] = useState<Range>("1M");
+  const [range, setRange] = usePref<Range>("home.range", "1M");
   const [hover, setHover] = useState<number | null>(null);
   const [moneyAction, setMoneyAction] = useState<MoneyAction | null>(null);
 

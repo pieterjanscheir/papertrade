@@ -217,7 +217,7 @@ Ask it to run `npm run typecheck && npm run lint && npm test` at the end.
 
 ## 6. Good to know
 
-- **Your data** lives in your browser's localStorage. Account → "Start over" resets it. A different browser means a different account.
+- **Your data** lives in your browser's localStorage: account, orders, alerts, learning progress, chart and table settings. Account → "Load a different account" swaps in a preset (Panic Seller, Oracle, Day Trader…), which is great for user tests. A different browser means a different account.
 - **Prices are a formula of time.** So anyone could compute future prices from the code. If there's a trading competition, don't peek ;-)
 - **Deploying:** it's a normal Next.js app. `npx vercel` or any Node host works. Add `ANTHROPIC_API_KEY` as an environment variable there if you use recipe H.
 - **Stuck?** `npm run typecheck` usually tells you exactly what's wrong. Otherwise ask a mentor.

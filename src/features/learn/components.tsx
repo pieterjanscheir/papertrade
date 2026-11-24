@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, CheckCircle2, ExternalLink, GraduationCap, Play } from "lucide-react";
 import { Sheet } from "@/components/sheet";
+import { Coin3D, Tilt } from "@/components/tilt";
 import { Button, Card } from "@/components/ui";
 import { ALL_LESSONS, COURSES, type Lesson } from "./lessons";
 import { useLearnProgress } from "./progress";
@@ -48,6 +49,9 @@ export function LearnScreen() {
     <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
+          <div className="mb-3">
+            <Coin3D size={56} label="€" />
+          </div>
           <p className="flex items-center gap-2 text-sm font-semibold text-accent">
             <GraduationCap size={16} /> Papertrade Academy
           </p>
@@ -81,9 +85,9 @@ export function LearnScreen() {
           <div className="scrollbar-none -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:px-0 xl:grid-cols-4">
             {course.lessons.map((l) => (
               <button key={l.id} onClick={() => setOpen(l)} className="group w-64 shrink-0 snap-start text-left md:w-auto">
-                <div className="transition group-hover:scale-[1.02]">
+                <Tilt max={8} className="rounded-xl">
                   <Thumbnail lesson={l} done={done.includes(l.id)} />
-                </div>
+                </Tilt>
                 <p className="mt-2 font-semibold leading-snug group-hover:text-accent">{l.title}</p>
                 <p className="mt-0.5 text-xs text-muted">
                   {l.level} · {l.summary}

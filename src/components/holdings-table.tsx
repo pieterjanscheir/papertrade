@@ -1,96 +1,86 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { REGION_FLAG } from "@/lib/market/assets";
 import { market } from "@/lib/market/provider";
-import type { PortfolioSummary } from "@/lib/trading/engine";
+import type { HoldingValue, PortfolioSummary } from "@/lib/trading/engine";
 import { money, pct, price as fmtPrice, qty, signedMoney, tone } from "@/lib/ui/format";
-import { AssetRow } from "./asset-row";
-import { AssetAvatar } from "./ui";
+import { DataTable, type Column } from "./data-table";
+import { AssetAvatar, ChangePill } from "./ui";
 
-/** Table on wide screens, compact rows on phones. */
+/** Your positions: sortable, filterable, table or cards. */
 export function HoldingsTable({ summary, now }: { summary: PortfolioSummary; now: number }) {
   const router = useRouter();
-  const investedTotal = summary.invested || 1;
+  const investedTotal = summary.holdings.reduce((s, h) => s + h.value, 0) || 1;
+  const asset = (h: HoldingValue) => market.getAsset(h.symbol)!;
+  const change = (h: HoldingValue) => market.quote(h.symbol, now).changePct;
+
+  const columns: Column<HoldingValue>[] = [
+    {
+      key: "name",
+      header: "Name",
+      sortValue: (h) => asset(h).name,
+      render: (h) => (
+        <span className="flex items-center gap-3">
+          <AssetAvatar asset={asset(h)} size={34} />
+          <span className="min-w-0">
+            <span className="block font-semibold">{asset(h).name}</span>
+            <span className="block text-xs text-muted">
+              {REGION_FLAG[asset(h).region]} {h.symbol}
+            </span>
+          </span>
+        </span>
+      ),
+    },
+    { key: "price", header: "Price", align: "right", sortValue: (h) => h.price, render: (h) => fmtPrice(h.price) },
+    { key: "24h", header: "24h", align: "right", sortValue: change, render: (h) => <ChangePill value={change(h)} /> },
+    { key: "units", header: "Units", align: "right", sortValue: (h) => h.quantity, render: (h) => <span className="text-muted">{qty(h.quantity)}</span> },
+    { key: "avg", header: "Avg cost", align: "right", sortValue: (h) => h.avgCost, render: (h) => <span className="text-muted">{fmtPrice(h.avgCost)}</span> },
+    { key: "value", header: "Value", align: "right", sortValue: (h) => h.value, render: (h) => <span className="font-semibold">{money(h.value)}</span> },
+    {
+      key: "return",
+      header: "Return",
+      align: "right",
+      sortValue: (h) => h.pnlPct,
+      render: (h) => (
+        <span className={`font-semibold ${tone(h.pnl)}`}>
+          {signedMoney(h.pnl)} <span className="text-xs font-medium">({pct(h.pnlPct)})</span>
+        </span>
+      ),
+    },
+    {
+      key: "weight",
+      header: "Weight",
+      sortValue: (h) => h.value / investedTotal,
+      render: (h) => (
+        <span className="flex min-w-28 items-center gap-2">
+          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
+            <span className="block h-full rounded-full bg-accent" style={{ width: `${(h.value / investedTotal) * 100}%` }} />
+          </span>
+          <span className="w-9 text-right text-xs text-muted">{((h.value / investedTotal) * 100).toFixed(0)}%</span>
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <>
-      <div className="p-1.5 md:hidden">
-        {summary.holdings.map((h) => (
-          <AssetRow
-            key={h.symbol}
-            symbol={h.symbol}
-            now={now}
-            spark={false}
-            subtitle={`${qty(h.quantity)} ${h.symbol}`}
-            right={
-              <>
-                <p className="tabular text-[15px] font-semibold">{money(h.value)}</p>
-                <p className={`tabular text-xs font-semibold ${tone(h.pnl)}`}>{signedMoney(h.pnl)}</p>
-              </>
-            }
-          />
-        ))}
-      </div>
-
-      <table className="hidden w-full text-sm md:table">
-        <thead>
-          <tr className="text-left text-xs font-medium text-muted [&>th]:px-4 [&>th]:py-3 [&>th]:font-medium">
-            <th>Name</th>
-            <th className="text-right">Price</th>
-            <th className="text-right">24h</th>
-            <th className="hidden text-right 2xl:table-cell">Units</th>
-            <th className="hidden text-right 2xl:table-cell">Avg cost</th>
-            <th className="text-right">Value</th>
-            <th className="text-right">Return</th>
-            <th className="hidden w-32 lg:table-cell">Weight</th>
-          </tr>
-        </thead>
-        <tbody>
-          {summary.holdings.map((h) => {
-            const asset = market.getAsset(h.symbol)!;
-            const q = market.quote(h.symbol, now);
-            const weight = h.value / investedTotal;
-            return (
-              <tr
-                key={h.symbol}
-                onClick={() => router.push(`/asset/${h.symbol}`)}
-                className="tabular cursor-pointer border-t border-line whitespace-nowrap transition hover:bg-surface-2 [&>td]:px-4 [&>td]:py-3"
-              >
-                <td>
-                  <Link href={`/asset/${h.symbol}`} className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                    <AssetAvatar asset={asset} size={34} />
-                    <span className="min-w-0">
-                      <span className="block font-semibold whitespace-nowrap">{asset.name}</span>
-                      <span className="block text-xs text-muted">{asset.symbol}</span>
-                    </span>
-                  </Link>
-                </td>
-                <td className="text-right">
-                  {fmtPrice(h.price)}
-                  <span className="block text-xs text-muted 2xl:hidden">{qty(h.quantity)} units</span>
-                </td>
-                <td className={`text-right font-semibold ${tone(q.changePct)}`}>{pct(q.changePct)}</td>
-                <td className="hidden text-right text-muted 2xl:table-cell">{qty(h.quantity)}</td>
-                <td className="hidden text-right text-muted 2xl:table-cell">{fmtPrice(h.avgCost)}</td>
-                <td className="text-right font-semibold">{money(h.value)}</td>
-                <td className={`text-right font-semibold ${tone(h.pnl)}`}>
-                  {signedMoney(h.pnl)}
-                  <span className="block text-xs font-medium">{pct(h.pnlPct)}</span>
-                </td>
-                <td className="hidden lg:table-cell">
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2">
-                      <div className="h-full rounded-full bg-accent" style={{ width: `${weight * 100}%` }} />
-                    </div>
-                    <span className="w-10 text-right text-xs text-muted">{(weight * 100).toFixed(0)}%</span>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </>
+    <DataTable
+      id="holdings"
+      rows={summary.holdings}
+      rowKey={(h) => h.symbol}
+      columns={columns}
+      onRowClick={(h) => router.push(`/asset/${h.symbol}`)}
+      search={(h) => `${asset(h).name} ${h.symbol} ${asset(h).sector} ${asset(h).region}`}
+      searchPlaceholder="Filter holdings"
+      defaultSort={{ key: "value", dir: "desc" }}
+      filters={[
+        { key: "stock", label: "Stocks", test: (h) => asset(h).type === "stock" },
+        { key: "etf", label: "ETFs", test: (h) => asset(h).type === "etf" },
+        { key: "crypto", label: "Crypto", test: (h) => asset(h).type === "crypto" },
+        { key: "winners", label: "Winners", test: (h) => h.pnl > 0 },
+        { key: "losers", label: "Losers", test: (h) => h.pnl < 0 },
+      ]}
+      empty="No holdings match this filter."
+    />
   );
 }

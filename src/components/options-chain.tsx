@@ -7,8 +7,11 @@ import { chainAt, contractId, contractLabel, expiriesAt, formatStrike, multiplie
 import { DAY } from "@/lib/market/simulator";
 import type { OptionHoldingValue } from "@/lib/trading/engine";
 import { money, price as fmtPrice, signedMoney, tone, pct } from "@/lib/ui/format";
+import { DataTable, type Column } from "./data-table";
 import { OptionTradeSheet } from "./option-trade-sheet";
 import { Card, SectionTitle } from "./ui";
+
+type ChainRow = ReturnType<typeof chainAt>[number];
 
 /** Calls on the left, puts on the right, strikes in the middle. Click a price to trade. */
 export function OptionsChain({ symbol, now }: { symbol: string; now: number }) {
@@ -17,25 +20,50 @@ export function OptionsChain({ symbol, now }: { symbol: string; now: number }) {
   const expiries = useMemo(() => expiriesAt(hour * 3_600_000), [hour]);
   const [picked, setPicked] = useState<number | null>(null);
   const expiry = picked !== null && expiries.includes(picked) ? picked : expiries[0];
-  const [mobileSide, setMobileSide] = useState<"call" | "put">("call");
   const [trade, setTrade] = useState<{ id: string; side: "buy" | "sell" } | null>(null);
 
   const rows = chainAt(symbol, expiry, now);
   const spot = rows[0]?.call.underlying ?? 0;
   const mult = multiplier(symbol);
-  const spotIndex = rows.findIndex((r) => r.strike > spot);
+  const firstAbove = rows.find((r) => r.strike > spot)?.strike;
+  const strikesSorted = rows.map((r) => r.strike);
+  const atmIndex = strikesSorted.reduce((best, k, i) => (Math.abs(k - spot) < Math.abs(strikesSorted[best] - spot) ? i : best), 0);
 
   const open = (type: "call" | "put", strike: number, side: "buy" | "sell") => setTrade({ id: contractId(symbol, type, strike, expiry), side });
 
-  const cell = (type: "call" | "put", strike: number, value: number, side: "buy" | "sell") => (
+  const priceButton = (type: "call" | "put", strike: number, value: number, side: "buy" | "sell") => (
     <button
-      onClick={() => open(type, strike, side)}
+      onClick={(e) => (e.stopPropagation(), open(type, strike, side))}
       className={`tabular rounded-md px-1.5 py-0.5 font-semibold transition ${side === "buy" ? "hover:bg-gain hover:text-black" : "hover:bg-loss hover:text-white"}`}
       title={`${side === "buy" ? "Buy" : "Sell"} ${symbol} ${formatStrike(strike)} ${type}`}
     >
       {value.toFixed(2)}
     </button>
   );
+
+  const itmCall = (r: ChainRow) => r.strike < spot;
+  const shade = (on: boolean) => (on ? "rounded-md bg-accent/[0.08] px-1 py-0.5" : "px-1 py-0.5");
+
+  const columns: Column<ChainRow>[] = [
+    {
+      key: "strike",
+      header: "Strike",
+      align: "center",
+      sortValue: (r) => r.strike,
+      render: (r) => (
+        <span className="inline-flex items-center gap-1.5 font-semibold">
+          {formatStrike(r.strike)}
+          {r.strike === firstAbove && <span className="rounded bg-accent/15 px-1 text-[10px] text-accent">↑ spot</span>}
+        </span>
+      ),
+    },
+    { key: "cBid", header: "Call bid", align: "right", sortValue: (r) => r.call.bid, render: (r) => <span className={shade(itmCall(r))}>{priceButton("call", r.strike, r.call.bid, "sell")}</span> },
+    { key: "cAsk", header: "Call ask", align: "right", sortValue: (r) => r.call.ask, render: (r) => <span className={shade(itmCall(r))}>{priceButton("call", r.strike, r.call.ask, "buy")}</span> },
+    { key: "cDelta", header: "Call Δ", align: "right", sortValue: (r) => r.call.delta, render: (r) => <span className="text-muted">{r.call.delta.toFixed(2)}</span> },
+    { key: "pBid", header: "Put bid", align: "right", sortValue: (r) => r.put.bid, render: (r) => <span className={shade(!itmCall(r))}>{priceButton("put", r.strike, r.put.bid, "sell")}</span> },
+    { key: "pAsk", header: "Put ask", align: "right", sortValue: (r) => r.put.ask, render: (r) => <span className={shade(!itmCall(r))}>{priceButton("put", r.strike, r.put.ask, "buy")}</span> },
+    { key: "pDelta", header: "Put Δ", align: "right", sortValue: (r) => r.put.delta, render: (r) => <span className="text-muted">{r.put.delta.toFixed(2)}</span> },
+  ];
 
   return (
     <div>
@@ -49,89 +77,42 @@ export function OptionsChain({ symbol, now }: { symbol: string; now: number }) {
         Options
       </SectionTitle>
       <Card className="overflow-hidden">
-        <div className="scrollbar-none flex gap-1.5 overflow-x-auto border-b border-line p-3">
-          {expiries.map((e) => {
-            const days = Math.max(0, Math.ceil((e - now) / DAY));
-            return (
-              <button
-                key={e}
-                onClick={() => setPicked(e)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${e === expiry ? "bg-fg text-bg" : "bg-surface-2 text-muted hover:text-fg"}`}
-              >
-                {new Date(e).toLocaleDateString("en-IE", { day: "numeric", month: "short" })} <span className="opacity-60">· {days}d</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex gap-1 p-3 pb-0 md:hidden">
-          {(["call", "put"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setMobileSide(s)}
-              className={`flex-1 rounded-full py-1.5 text-xs font-semibold capitalize ${mobileSide === s ? "bg-surface-2 text-fg" : "text-muted"}`}
-            >
-              {s}s
-            </button>
-          ))}
-        </div>
-
-        <table className="tabular w-full text-center text-xs sm:text-sm">
-          <thead className="text-[11px] text-muted">
-            <tr>
-              <th colSpan={3} className={`pt-3 font-semibold text-gain ${mobileSide === "put" ? "hidden md:table-cell" : ""}`}>
-                Calls
-              </th>
-              <th />
-              <th colSpan={3} className={`pt-3 font-semibold text-loss ${mobileSide === "call" ? "hidden md:table-cell" : ""}`}>
-                Puts
-              </th>
-            </tr>
-            <tr className="[&>th]:py-2 [&>th]:font-medium">
-              {(["Δ", "Bid", "Ask"] as const).map((h) => (
-                <th key={`c${h}`} className={mobileSide === "put" ? "hidden md:table-cell" : ""}>
-                  {h}
-                </th>
-              ))}
-              <th className="text-fg">Strike</th>
-              {(["Bid", "Ask", "Δ"] as const).map((h) => (
-                <th key={`p${h}`} className={mobileSide === "call" ? "hidden md:table-cell" : ""}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => {
-              const callItm = r.strike < spot;
-              const callCls = `${callItm ? "bg-accent/[0.06]" : ""} ${mobileSide === "put" ? "hidden md:table-cell" : ""}`;
-              const putCls = `${!callItm ? "bg-accent/[0.06]" : ""} ${mobileSide === "call" ? "hidden md:table-cell" : ""}`;
-              return [
-                i === spotIndex && (
-                  <tr key="spot">
-                    <td colSpan={7} className="py-0">
-                      <div className="flex items-center gap-2 px-3 text-[11px] font-semibold text-accent">
-                        <span className="h-px flex-1 bg-accent/50" /> {symbol} {fmtPrice(spot)} <span className="h-px flex-1 bg-accent/50" />
-                      </div>
-                    </td>
-                  </tr>
-                ),
-                <tr key={r.strike} className="border-t border-line/60 [&>td]:py-1.5">
-                  <td className={`text-muted ${callCls}`}>{r.call.delta.toFixed(2)}</td>
-                  <td className={callCls}>{cell("call", r.strike, r.call.bid, "sell")}</td>
-                  <td className={callCls}>{cell("call", r.strike, r.call.ask, "buy")}</td>
-                  <td className="bg-surface-2/60 font-semibold">{formatStrike(r.strike)}</td>
-                  <td className={putCls}>{cell("put", r.strike, r.put.bid, "sell")}</td>
-                  <td className={putCls}>{cell("put", r.strike, r.put.ask, "buy")}</td>
-                  <td className={`text-muted ${putCls}`}>{r.put.delta.toFixed(2)}</td>
-                </tr>,
-              ];
+        <div className="flex items-center gap-3 border-b border-line p-3">
+          <div className="scrollbar-none flex min-w-0 flex-1 gap-1.5 overflow-x-auto">
+            {expiries.map((e) => {
+              const days = Math.max(0, Math.ceil((e - now) / DAY));
+              return (
+                <button
+                  key={e}
+                  onClick={() => setPicked(e)}
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${e === expiry ? "bg-fg text-bg" : "bg-surface-2 text-muted hover:text-fg"}`}
+                >
+                  {new Date(e).toLocaleDateString("en-IE", { day: "numeric", month: "short" })} <span className="opacity-60">· {days}d</span>
+                </button>
+              );
             })}
-          </tbody>
-        </table>
+          </div>
+          <span className="tabular shrink-0 text-xs text-muted">
+            {symbol} <span className="font-semibold text-accent">{fmtPrice(spot)}</span>
+          </span>
+        </div>
+        <DataTable
+          id="options-chain"
+          rows={rows}
+          rowKey={(r) => String(r.strike)}
+          columns={columns}
+          stickyFirst
+          defaultSort={{ key: "strike", dir: "asc" }}
+          filters={[
+            { key: "near", label: "Near the money", test: (r) => Math.abs(rows.indexOf(r) - atmIndex) <= 2 },
+            { key: "itmCalls", label: "Calls in the money", test: (r) => itmCall(r) },
+            { key: "itmPuts", label: "Puts in the money", test: (r) => !itmCall(r) },
+          ]}
+          rowClassName={(r) => (r.strike === firstAbove ? "border-t-2 !border-t-accent/60" : "")}
+        />
         <p className="border-t border-line p-3 text-[11px] text-muted">
-          Prices per {mult === 1 ? "unit" : "share"}; 1 contract = {mult} {mult === 1 ? "unit" : "shares"}. Tap an ask to buy. Shaded = in the money. European-style, cash-settled at
-          expiry (Fridays 16:00 UTC). Simulated.
+          Prices per {mult === 1 ? "unit" : "share"}; 1 contract = {mult} {mult === 1 ? "unit" : "shares"}. Tap an ask to buy, a bid to sell. Shaded = in the money.
+          European-style, cash-settled at expiry (Fridays 16:00 UTC). Simulated.
         </p>
       </Card>
       <OptionTradeSheet contract={trade?.id ?? null} side={trade?.side ?? "buy"} onClose={() => setTrade(null)} />

@@ -1,5 +1,6 @@
 "use client";
 
+import { usePref } from "@/lib/ui/prefs";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Star } from "lucide-react";
@@ -27,11 +28,11 @@ export function AssetScreen({ symbol }: { symbol: string }) {
   const account = useAccount();
   const toggleWatch = useAccountStore((s) => s.toggleWatch);
   const asset = market.getAsset(symbol)!;
-  const [range, setRange] = useState<Range>("1D");
+  const [range, setRange] = usePref<Range>("asset.range", "1D");
   const [hover, setHover] = useState<number | null>(null);
   const [trade, setTrade] = useState<Side | null>(null);
-  const [chartType, setChartType] = useState<"line" | "candles">("line");
-  const [overlays, setOverlays] = useState({ ma20: true, ma50: false, volume: true });
+  const [chartType, setChartType] = usePref<"line" | "candles">("asset.chartType", "line");
+  const [overlays, setOverlays] = usePref("asset.overlays", { ma20: true, ma50: false, volume: true });
 
   const history = useMemo(() => market.history(symbol, range, now), [symbol, range, now]);
   const stats = useMemo(() => market.stats(symbol, now), [symbol, now]);
