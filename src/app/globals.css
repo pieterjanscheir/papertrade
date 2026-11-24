@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Change these to re-theme the whole app.
+ * Usage in Tailwind: bg-bg, bg-surface, bg-surface-2, border-line, text-fg,
+ * text-muted, text-accent, bg-accent, text-gain, text-loss …
+ */
+@theme {
+  --color-bg: #08090c;
+  --color-surface: #14161b;
+  --color-surface-2: #1d2027;
+  --color-line: #262a33;
+  --color-fg: #f4f5f7;
+  --color-muted: #8b919e;
+  --color-accent: #6d7cff;
+  --color-accent-2: #a46bff;
+  --color-gain: #2fd18b;
+  --color-loss: #ff5d6c;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 1.25rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+/* Scale the whole UI up a little on big screens (Tailwind sizes are rem-based). */
+@media (min-width: 1280px) {
+  html {
+    font-size: 17px;
+  }
+}
+@media (min-width: 1680px) {
+  html {
+    font-size: 18px;
+  }
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "tnum" 1, "cv11" 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(4px);
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-sheet {
+  animation: sheet-in 180ms ease-out;
+}
+
+@keyframes flash-gain {
+  from { background-color: color-mix(in srgb, var(--color-gain) 25%, transparent); }
+  to { background-color: transparent; }
+}
+@keyframes flash-loss {
+  from { background-color: color-mix(in srgb, var(--color-loss) 25%, transparent); }
+  to { background-color: transparent; }
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

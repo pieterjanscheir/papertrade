@@ -1,0 +1,42 @@
+{
+  "status": 200,
+  "headers": {
+    "link": "</_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2>; rel=preload; as=\"font\"; crossorigin=\"\"; type=\"font/woff2\", </_next/static/chunks/188mjfini-8n7.css>; rel=preload; as=\"style\"",
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/asset/layout,_N_T_/asset/[symbol]/layout,_N_T_/asset/[symbol]/page"
+  },
+  "postponed": "719:10[\"symbol\"][0,{\"nextSegmentId\":0,\"rootFormatContext\":{\"insertionMode\":0,\"selectedValue\":null,\"tagScope\":0,\"viewTransition\":null},\"progressiveChunkSize\":12800,\"resumableState\":{\"idPrefix\":\"\",\"nextFormID\":0,\"streamingFormat\":0,\"bootstrapScripts\":[{\"src\":\"/_next/static/chunks/22h4rqyt4ca13.js\"}],\"instructions\":0,\"hasBody\":false,\"hasHtml\":false,\"unknownResources\":{\"font\":{\"/_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2\":[]}},\"dnsResources\":{},\"connectResources\":{\"default\":{},\"anonymous\":{},\"credentials\":{}},\"imageResources\":{},\"styleResources\":{\"/_next/static/chunks/188mjfini-8n7.css\":[]},\"scriptResources\":{},\"moduleUnknownResources\":{},\"moduleScriptResources\":{}},\"replayNodes\":[],\"replaySlots\":-1}]null",
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/asset/$d$symbol/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 49216,
+    "slots": {
+      "children": {
+        "hints": 49248,
+        "slots": {
+          "children": {
+            "hints": 49248,
+            "slots": {
+              "children": {
+                "hints": 49312,
+                "slots": null
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/f488de4e8ab931834f9cb08f1d14fda167f2ea57ac084dd7c3afda727e99db8a/$/asset/[symbol]",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/asset/[symbol]/page"
+    },
+    "isFallback": true
+  }
+}

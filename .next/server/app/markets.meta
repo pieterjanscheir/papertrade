@@ -1,0 +1,36 @@
+{
+  "status": 200,
+  "headers": {
+    "link": "</_next/static/media/07c7676b89ed2778-s.p.2bn3s6zvc0dyp.woff2>; rel=preload; as=\"font\"; crossorigin=\"\"; type=\"font/woff2\"",
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/markets/layout,_N_T_/markets/page,_N_T_/markets"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/markets/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 49216,
+    "slots": {
+      "children": {
+        "hints": 49248,
+        "slots": {
+          "children": {
+            "hints": 49312,
+            "slots": null
+          }
+        }
+      }
+    }
+  },
+  "routeCache": {
+    "key": "/route-cache/APP_PAGE/2119ca96803295d5340aeca02c545d00ffb84249b877a3135ca39b2b1c960b0e/$/markets",
+    "owner": {
+      "kind": "APP_PAGE",
+      "sourceRoute": "/markets/page"
+    },
+    "isFallback": false
+  }
+}
