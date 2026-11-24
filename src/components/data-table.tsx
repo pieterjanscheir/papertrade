@@ -219,7 +219,7 @@ export function DataTable<T>({
           </table>
         </div>
       ) : (
-        <div className="grid gap-3 p-3 sm:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,360px),1fr))] gap-3 p-3">
           {shown.map((r) => {
             const [title, ...rest] = columns.filter((c) => c.card !== false);
             return (

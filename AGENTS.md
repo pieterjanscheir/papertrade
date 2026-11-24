@@ -54,6 +54,7 @@ Before saying a change is done: `npm run typecheck && npm run lint && npm test`.
 - **Colour meaning:** `gain`/`loss` only for up/down, buy/sell, errors.
 - **Client components:** screens are client components (`"use client"`). The app renders behind a splash until localStorage has loaded, so don't fight hydration; use `createLocalStore` for persisted state.
 - **Prefer slots over editing screens.** Only edit `src/components/screens/*` when a slot can't do it.
+- The site password gate is `src/proxy.ts` (env `SITE_PASSWORD`, copy `.env.example` to `.env.local`). Don't remove it; new routes are covered automatically.
 - Keep the "simulated prices / play money" disclaimers. Don't add real brokerage, payment or personal-data flows.
 
 ## Next.js 16 gotchas in this repo

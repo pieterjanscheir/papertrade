@@ -10,10 +10,11 @@ A good-looking paper-trading app you can fork for a hackathon. Buy and sell stoc
 
 ```bash
 npm install
+cp .env.example .env.local   # sets the site password (SITE_PASSWORD=lynx)
 npm run dev
 ```
 
-Open http://localhost:3000. The first visit creates a **demo portfolio** with about 7 months of history, so every chart has something on it. You can reset to an empty €10,000 account from the Account tab.
+Open http://localhost:3000 and enter the password. The first visit creates a **demo portfolio** with about 7 months of history, so every chart has something on it. You can reset to an empty €10,000 account from the Account tab.
 
 ```bash
 npm test          # engine + simulator tests (vitest)
@@ -138,6 +139,7 @@ A hybrid also works well: real prices for the current quote, and the simulator f
 - **Testing with traders:** traders can try a team's build in the browser; the demo portfolio gives everyone the same starting point. Demo controls let teams reproduce a market moment on demand.
 - **AI:** if teams may use the Claude API, hand out API keys (recipe H in `HACKATHON.md`); keys belong in `.env.local`, which git ignores.
 - **Fairness:** prices can be computed ahead of time from the code. Fine for a design hackathon; for a trading competition, move price generation server-side.
+- **Password:** the whole site (pages and API) sits behind one shared password from the `SITE_PASSWORD` env variable (`src/proxy.ts`). Set it in `.env.local` locally and in your host's environment settings when you deploy; leave it empty to switch the lock off. Changing it logs everyone out.
 - **Deploy:** standard Next.js, so Vercel or any Node host works. Every deploy uses the same simulated prices.
 
 ## Hackathon challenge ideas

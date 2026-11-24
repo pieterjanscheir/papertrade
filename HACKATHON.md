@@ -12,10 +12,11 @@ You've just come out of a design-thinking workshop with real traders. You have a
 git clone <your team's fork> papertrade
 cd papertrade
 npm install
+cp .env.example .env.local   # the site password, ask the organisers if it's not "lynx"
 npm run dev
 ```
 
-Open http://localhost:3000. You start with a demo portfolio that has about 7 months of history.
+Open http://localhost:3000 and enter the password. Don't need the lock locally? Empty `SITE_PASSWORD` in `.env.local` and restart `npm run dev`. You start with a demo portfolio that has about 7 months of history.
 
 Take five minutes to click around:
 
