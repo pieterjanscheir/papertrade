@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Compass, Home, Palette, UserRound, Zap } from "lucide-react";
+import { Activity, ClipboardList, Compass, Home, Palette, Trophy, UserRound, Zap } from "lucide-react";
 import { enabledFeatures } from "@/features";
 import { useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
@@ -130,6 +130,12 @@ function BuilderLinks() {
         <Zap size={16} /> Demo controls
         <kbd className="ml-auto rounded bg-surface-2 px-1.5 text-[10px]">⇧D</kbd>
       </button>
+      <Link href="/hackathon" className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:bg-surface hover:text-fg">
+        <Trophy size={16} /> Hackathon info
+      </Link>
+      <Link href="/testing" className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:bg-surface hover:text-fg">
+        <ClipboardList size={16} /> User testing
+      </Link>
       <Link href="/design" className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-muted transition hover:bg-surface hover:text-fg">
         <Palette size={16} /> Design system
       </Link>

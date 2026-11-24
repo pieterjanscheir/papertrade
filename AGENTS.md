@@ -38,6 +38,8 @@ Before saying a change is done: `npm run typecheck && npm run lint && npm test`.
 | A remembered UI setting | `usePref(key, default)` from `src/lib/ui/prefs.ts` (like `useState`, saved in localStorage) |
 | 3D / motion | `Tilt`, `Coin3D` from `src/components/tilt.tsx`, `PlayCard` from `src/components/play-card.tsx` |
 | A preset account | `PRESETS` / `createPresetAccount` in `src/lib/trading/seed.ts` |
+| A user-test task | `DEFAULT_TASKS` in `src/features/user-testing/tasks.ts` (optional `check(account, since)` auto-completes it) |
+| Event info (schedule, rubric, FAQ) | `src/features/hackathon/content.ts` |
 | Trading rules (orders, fees, P/L) | `src/lib/trading/engine.ts` and `orders.ts`: pure functions, add tests next to them |
 | Prices, candles, assets | Read through `market` from `src/lib/market/provider.ts`. Assets are in `src/lib/market/assets.ts` |
 | Options | Pricing/contracts: `src/lib/market/options.ts`. Trading/settlement: `src/lib/trading/options-trading.ts`. Portfolio totals incl. options: `portfolioSummary` / `portfolioHistory` from `src/lib/trading/portfolio.ts` |

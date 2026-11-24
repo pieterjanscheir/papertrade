@@ -49,13 +49,12 @@ export function LearnScreen() {
     <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-3">
-            <Coin3D size={56} label="€" />
-          </div>
           <p className="flex items-center gap-2 text-sm font-semibold text-accent">
             <GraduationCap size={16} /> Papertrade Academy
           </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight lg:text-4xl">Learn</h1>
+          <h1 className="mt-1 flex items-center gap-3 text-3xl font-semibold tracking-tight lg:text-4xl">
+            Learn <Coin3D size={36} label="€" />
+          </h1>
           <p className="mt-2 max-w-xl text-sm text-muted">
             Short lessons on investing basics, orders and options. Every lesson has a “video”. None of the videos work. The notes do.
           </p>
@@ -84,7 +83,7 @@ export function LearnScreen() {
           <p className="mb-4 text-sm text-muted">{course.subtitle}</p>
           <div className="scrollbar-none -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:px-0 xl:grid-cols-4">
             {course.lessons.map((l) => (
-              <button key={l.id} onClick={() => setOpen(l)} className="group w-64 shrink-0 snap-start text-left md:w-auto">
+              <button key={l.id} onClick={() => setOpen(l)} className="group flex w-64 shrink-0 snap-start flex-col justify-start text-left md:w-auto">
                 <Tilt max={8} className="rounded-xl">
                   <Thumbnail lesson={l} done={done.includes(l.id)} />
                 </Tilt>

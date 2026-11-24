@@ -11,6 +11,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { marketNow } from "../demo/store";
+import { usePrefsStore } from "../ui/prefs";
 import { market } from "../market/provider";
 import {
   deposit,
@@ -149,6 +150,7 @@ export const useAccountStore = create<AccountStore>()(
       reset(kind) {
         const now = marketNow();
         set({ account: createPresetAccount(kind, now, market.priceAt) });
+        usePrefsStore.getState().set("account.preset", kind); // context for user-testing feedback
       },
     }),
     {

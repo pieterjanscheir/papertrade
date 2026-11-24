@@ -47,6 +47,8 @@ Notifications pop up when an order fills, is rejected or expires. The layout is 
 | **Demo controls** (`Shift + D`) | Clock: pause, speed up (presets up to 1 day per second, or a custom multiplier), step forward or jump to a date. Scenarios: presets or your own (size, duration, scheduled start, headline) for the market, an asset type, a sector or one asset, with a list of active scenarios. Account: play money, cancel orders, reset. A violet banner shows when the app isn't live |
 | **News feed** (`/news`) | Satirical headlines generated from the simulated price moves: jokes written per instrument and per sector (`src/features/news/flavor.ts`), ESG stories, and BREAKING news from scenarios |
 | **ESG vibes** | A comedic, entirely made-up ESG report per asset (plants, cake, meetings) and a portfolio score on Home (`src/features/esg`) |
+| **Hackathon info** (`/hackathon`) | Event page: schedule with trader sessions, judging rubric, 5-minute pitch structure, demo tips, ground rules and FAQ. Organisers edit `src/features/hackathon/content.ts` (dates, location, contact, schedule) |
+| **User testing** (`/testing`) | Testing mode with a Feedback button (⇧F) that saves notes with page and account context; timed test tasks that complete themselves when the account shows success; an ease rating after each task; results per task; CSV and Markdown export for synthesis |
 | **Design system** (`/design`) | Colour tokens, type scale, formatting helpers, every component live, design principles, and the registered features |
 | **AGENTS.md / CLAUDE.md** | Rules and a map of the codebase for AI coding tools |
 
@@ -129,6 +131,8 @@ A hybrid also works well: real prices for the current quote, and the simulator f
 
 ## For organisers
 
+- **Event page:** fill in `src/features/hackathon/content.ts` (name, dates, location, contact, schedule, rubric). It powers `/hackathon`.
+- **User tests with traders:** each team runs `/testing` on their own laptop. Tasks with an automatic check finish themselves; teams add tasks for their own feature on that page or in `src/features/user-testing/tasks.ts`.
 - **Setup:** publish this repo (as a template repository, so each team can create their own copy) and ask teams to run it before the event (Node 20+). Each team works in its own fork or branch; features live in their own folder, so merging several teams' work later is mostly painless.
 - **Workshop → build:** have each team bring one "How might we…" question and one trader quote. `HACKATHON.md` § 2 maps typical ideas to the place in the code where they go.
 - **Testing with traders:** traders can try a team's build in the browser; the demo portfolio gives everyone the same starting point. Demo controls let teams reproduce a market moment on demand.

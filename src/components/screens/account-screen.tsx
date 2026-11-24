@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Palette, Zap } from "lucide-react";
+import { ClipboardList, Palette, Trophy, Zap } from "lucide-react";
 import { useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
 import { ORDER_FEE } from "@/lib/trading/engine";
@@ -69,13 +69,19 @@ export function AccountScreen() {
 
       <div>
         <SectionTitle>For builders</SectionTitle>
-        <Card className="flex gap-3 p-4">
-          <Button variant="secondary" className="flex-1" onClick={() => setPanelOpen(true)}>
+        <Card className="grid grid-cols-2 gap-3 p-4">
+          <Button variant="secondary" onClick={() => setPanelOpen(true)}>
             <Zap size={16} /> Demo controls
           </Button>
-          <Link href="/design" className="flex flex-1 items-center justify-center gap-2 rounded-full bg-surface-2 px-5 py-3 text-sm font-semibold hover:bg-line">
-            <Palette size={16} /> Design system
-          </Link>
+          {[
+            { href: "/hackathon", label: "Hackathon info", icon: Trophy },
+            { href: "/testing", label: "User testing", icon: ClipboardList },
+            { href: "/design", label: "Design system", icon: Palette },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} className="flex items-center justify-center gap-2 rounded-full bg-surface-2 px-5 py-3 text-sm font-semibold hover:bg-line">
+              <l.icon size={16} /> {l.label}
+            </Link>
+          ))}
         </Card>
       </div>
 

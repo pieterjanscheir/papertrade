@@ -222,7 +222,21 @@ Ask it to run `npm run typecheck && npm run lint && npm test` at the end.
 - **Deploying:** it's a normal Next.js app. `npx vercel` or any Node host works. Add `ANTHROPIC_API_KEY` as an environment variable there if you use recipe H.
 - **Stuck?** `npm run typecheck` usually tells you exactly what's wrong. Otherwise ask a mentor.
 
-## 7. Checklist before you present
+## 7. Testing with traders
+
+Open **/testing** (sidebar → For builders → User testing).
+
+1. Type the tester's name or code, pick an account preset that fits your scenario (Account → Load a different account).
+2. Press **Start** on a task, read it out loud, hand over the laptop. A bar shows the task and a timer. Tasks with an automatic check complete themselves; otherwise the tester presses **Done** or **Give up**.
+3. After each task the tester rates how easy it was (1–7).
+4. With testing mode on, anyone can press **Feedback** (or ⇧F) on any page to leave a note with a mood and tags. The page and account are saved with it.
+5. Afterwards: **Copy summary (Markdown)** for your synthesis, or download the CSVs.
+
+Add tasks for your own feature on the /testing page, or in code in `src/features/user-testing/tasks.ts` (with a `check` function to make them complete themselves).
+
+The event schedule, judging criteria and pitch structure are on **/hackathon**.
+
+## 8. Checklist before you present
 
 - [ ] Can you explain the trader's problem in one sentence, using a quote from the workshop?
 - [ ] Does the demo show that problem first, then your solution?

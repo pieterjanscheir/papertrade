@@ -11,6 +11,7 @@
 
 import { esg } from "./esg";
 import { learn } from "./learn";
+import { userTesting } from "./user-testing";
 import { news } from "./news";
 import { priceAlerts } from "./price-alerts";
 import type { Feature } from "./types";
@@ -19,6 +20,7 @@ export const FEATURES: Feature[] = [
   news,
   learn,
   esg,
+  userTesting,
   priceAlerts,
   // yourFeature,
 ];
