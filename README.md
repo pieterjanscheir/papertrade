@@ -4,6 +4,8 @@ A good-looking paper-trading app you can fork for a hackathon. Buy and sell stoc
 
 > Play money only. Prices come from a simulator, not a market feed. Nothing here is investment advice.
 
+**Participants: read [HACKATHON.md](HACKATHON.md).** It shows how to turn a workshop idea into a feature in this app, with recipes. Coding agents read [AGENTS.md](AGENTS.md).
+
 ## Quick start
 
 ```bash
@@ -26,12 +28,21 @@ npm run build
 | --- | --- |
 | **Home** | Total value, scrubbable portfolio chart (1D–5Y), holdings table with return and weight, allocation donut (by asset / type / sector), open orders, watchlist, biggest movers |
 | **Invest** | Market overview cards, search, filters (watchlist, stocks, ETFs, crypto), sorting (A–Z, gainers, losers, best 1Y), a full table with 7-day sparklines on wide screens |
-| **Asset** | Live price, chart with lines for your average cost and open orders, position, stats, about, order history, trades |
+| **Asset** | Live price; line chart or **candlesticks with volume and MA 20/50**, price axis and OHLC crosshair; lines for your average cost and open orders; position, stats, about, order history, trades |
 | **Order panel** | **Market, limit and stop orders**, buy or sell by EUR amount or units, fractional shares, expiry (1 day, 1 week, 1 month, until cancelled), €1 flat fee, live estimate. Docked next to the chart on desktop, a bottom sheet on mobile |
 | **Activity** | Transactions grouped by day, plus an Orders tab (open, filled, cancelled, expired, rejected) |
 | **Account** | Add or withdraw play money, reset to the demo or an empty account |
 
 Notifications pop up when an order fills, is rejected or expires. The layout is responsive: a bottom tab bar on phones; a sidebar, two-column dashboards and tables on desktop. The UI also scales up slightly on very large screens.
+
+### For builders
+
+| Tool | What it's for |
+| --- | --- |
+| **Feature slots** (`src/features`) | Teams add a folder and register it; it appears on Home (`HomeWidget`), on asset pages (`AssetPanel`), in the menu (`nav`) and on every clock tick (`Runner`). Example included: price alerts |
+| **Demo controls** (`Shift + D`) | Pause, speed up (up to 1 hour per second) or jump the market clock; trigger a crash, dip, rally, spike or volatility storm for the market or one asset. A banner shows when the app isn't live |
+| **Design system** (`/design`) | Colour tokens, type scale, formatting helpers, every component live, design principles, and the registered features |
+| **AGENTS.md / CLAUDE.md** | Rules and a map of the codebase for AI coding tools |
 
 ### Order types
 
@@ -52,7 +63,7 @@ src/
 ├─ lib/
 │  ├─ market/
 │  │  ├─ assets.ts      ← the tradable universe (34 instruments)
-│  │  ├─ simulator.ts   ← deterministic price engine: price = f(symbol, time)
+│  │  ├─ simulator.ts   ← deterministic price engine: price = f(symbol, time), candles, scenario events
 │  │  └─ provider.ts    ← `market`: the ONLY thing the UI reads prices from
 │  ├─ trading/
 │  │  ├─ engine.ts      ← pure functions: market orders, fees, positions, P/L, valuation
@@ -60,8 +71,11 @@ src/
 │  │  ├─ seed.ts        ← demo and fresh starting accounts
 │  │  ├─ store.ts       ← zustand store persisted to localStorage
 │  │  └─ *.test.ts
-│  └─ ui/               ← formatting, shared clock (ticks every 2s)
-├─ components/          ← chart, sheets, rows, screens
+│  ├─ demo/store.ts     ← demo controls: market clock (marketNow) + scenarios
+│  ├─ local-store.ts    ← createLocalStore: persisted state for features
+│  └─ ui/               ← formatting, shared clock (ticks every 2s), toasts
+├─ features/            ← hackathon features plug in here (registry + example)
+├─ components/          ← charts, order form, sheets, rows, screens
 └─ app/                 ← routes + JSON API
 ```
 
@@ -103,6 +117,15 @@ To switch, implement the `MarketData` interface in `src/lib/market/provider.ts` 
 3. answer `priceAt` / `quote` / `history` from that cache.
 
 A hybrid also works well: real prices for the current quote, and the simulator for anything the provider doesn't cover.
+
+## For organisers
+
+- **Setup:** publish this repo (as a template repository, so each team can create their own copy) and ask teams to run it before the event (Node 20+). Each team works in its own fork or branch; features live in their own folder, so merging several teams' work later is mostly painless.
+- **Workshop → build:** have each team bring one "How might we…" question and one trader quote. `HACKATHON.md` § 2 maps typical ideas to the place in the code where they go.
+- **Testing with traders:** traders can try a team's build in the browser; the demo portfolio gives everyone the same starting point. Demo controls let teams reproduce a market moment on demand.
+- **AI:** if teams may use the Claude API, hand out API keys (recipe H in `HACKATHON.md`); keys belong in `.env.local`, which git ignores.
+- **Fairness:** prices can be computed ahead of time from the code. Fine for a design hackathon; for a trading competition, move price generation server-side.
+- **Deploy:** standard Next.js, so Vercel or any Node host works. Every deploy uses the same simulated prices.
 
 ## Hackathon challenge ideas
 

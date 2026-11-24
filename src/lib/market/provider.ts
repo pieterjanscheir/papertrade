@@ -9,11 +9,13 @@
 
 import { ASSETS, getAsset, type Asset } from "./assets";
 import {
+  candlesFor,
   historyFor,
   priceAt,
   quoteAt,
   statsFor,
   type AssetStats,
+  type Candle,
   type PricePoint,
   type Quote,
   type Range,
@@ -27,6 +29,8 @@ export interface MarketData {
   priceAt(symbol: string, t: number): number;
   quote(symbol: string, t: number): Quote;
   history(symbol: string, range: Range, now: number): PricePoint[];
+  /** OHLC candles; `extra` = additional candles before the range (for indicators). */
+  candles(symbol: string, range: Range, now: number, extra?: number): Candle[];
   stats(symbol: string, now: number): AssetStats;
 }
 
@@ -37,6 +41,7 @@ export const simulatedMarket: MarketData = {
   priceAt,
   quote: quoteAt,
   history: historyFor,
+  candles: candlesFor,
   stats: statsFor,
 };
 

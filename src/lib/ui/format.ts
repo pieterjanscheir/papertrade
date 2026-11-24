@@ -49,7 +49,7 @@ export function dateTime(t: number): string {
   });
 }
 
-export function dayLabel(t: number, now = Date.now()): string {
+export function dayLabel(t: number, now: number): string {
   const d = new Date(t);
   const today = new Date(now);
   const yesterday = new Date(now - 86_400_000);
@@ -73,4 +73,9 @@ export function tone(x: number): string {
   if (x > 0) return "text-gain";
   if (x < 0) return "text-loss";
   return "text-muted";
+}
+
+const compactFmt = new Intl.NumberFormat("en-IE", { notation: "compact", maximumFractionDigits: 1 });
+export function compactNumber(x: number): string {
+  return compactFmt.format(x);
 }

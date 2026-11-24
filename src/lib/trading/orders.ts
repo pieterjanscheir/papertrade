@@ -152,7 +152,8 @@ export function processOrders(
   const open = openOrders(state);
   if (open.length === 0) return { state: { ...state, ordersCheckedAt: now }, events: [] };
 
-  const lastCheck = Math.max(state.ordersCheckedAt || 0, now - MAX_CATCH_UP);
+  // min(): the demo clock can be moved back to live time after jumping ahead.
+  const lastCheck = Math.max(Math.min(state.ordersCheckedAt || 0, now), now - MAX_CATCH_UP);
   const hits: { order: Order; t: number }[] = [];
   for (const order of open) {
     const from = Math.max(lastCheck, order.createdAt);

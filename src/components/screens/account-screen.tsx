@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { RotateCcw, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Palette, RotateCcw, Sparkles, Zap } from "lucide-react";
+import { useDemoStore } from "@/lib/demo/store";
 import { market } from "@/lib/market/provider";
 import { ORDER_FEE } from "@/lib/trading/engine";
 import { STARTING_CASH } from "@/lib/trading/seed";
@@ -15,6 +17,7 @@ import { Button, Card, SectionTitle } from "../ui";
 export function AccountScreen() {
   const account = useAccount();
   const reset = useAccountStore((s) => s.reset);
+  const setPanelOpen = useDemoStore((s) => s.setPanelOpen);
   const [moneyAction, setMoneyAction] = useState<MoneyAction | null>(null);
   const [confirm, setConfirm] = useState<StartKind | null>(null);
 
@@ -57,6 +60,18 @@ export function AccountScreen() {
             body={`Start from scratch with ${money(STARTING_CASH)} in cash.`}
             onClick={() => setConfirm("fresh")}
           />
+        </Card>
+      </div>
+
+      <div>
+        <SectionTitle>For builders</SectionTitle>
+        <Card className="flex gap-3 p-4">
+          <Button variant="secondary" className="flex-1" onClick={() => setPanelOpen(true)}>
+            <Zap size={16} /> Demo controls
+          </Button>
+          <Link href="/design" className="flex flex-1 items-center justify-center gap-2 rounded-full bg-surface-2 px-5 py-3 text-sm font-semibold hover:bg-line">
+            <Palette size={16} /> Design system
+          </Link>
         </Card>
       </div>
 

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowUpFromLine, Compass, History, Plus } from "lucide-react";
+import { enabledFeatures } from "@/features";
 import { market } from "@/lib/market/provider";
 import { sampleTimes, type Range } from "@/lib/market/simulator";
 import { netDeposits, summarize, valueHistory } from "@/lib/trading/engine";
@@ -152,6 +153,9 @@ export function HomeScreen() {
             )}
           </Card>
         </div>
+
+        {/* Feature slot: HomeWidget (src/features) */}
+        {enabledFeatures().map((f) => (f.HomeWidget ? <f.HomeWidget key={f.id} now={now} /> : null))}
 
         {account.watchlist.length > 0 && (
           <div>

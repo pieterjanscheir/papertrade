@@ -89,6 +89,69 @@ function fractal(symbol: string, t: number): number {
 }
 
 // ---------------------------------------------------------------------------
+// Scenario events (demo controls)
+// ---------------------------------------------------------------------------
+
+/**
+ * A scripted market move layered on top of the normal simulation, e.g. "the whole
+ * market drops 15% over 10 minutes". Used by the demo controls so a team can show
+ * their feature reacting to a crash on stage. Events live on the client only
+ * (see lib/demo/store.ts); the JSON API never sees them.
+ */
+export interface MarketEvent {
+  id: string;
+  label: string;
+  /** A symbol, or "*" for the whole market (scaled by each asset's volatility). */
+  symbol: string;
+  start: number;
+  /** How long the move takes to play out, in ms. */
+  duration: number;
+  /** Size of the move, e.g. -0.15 for a 15% drop. Ignored when `kind` is "volatility". */
+  move: number;
+  kind: "move" | "volatility";
+}
+
+let events: MarketEvent[] = [];
+
+/** Replace the active scenario events. */
+export function setMarketEvents(next: MarketEvent[]) {
+  events = next;
+}
+
+/** Whole-market moves hit volatile assets harder (a crude "beta"). */
+function beta(a: Asset) {
+  return Math.min(2.2, Math.max(0.5, a.volatility / 0.25));
+}
+
+function eventShift(a: Asset, t: number): number {
+  let shift = 0;
+  for (const e of events) {
+    if (t <= e.start || (e.symbol !== "*" && e.symbol !== a.symbol)) continue;
+    const x = Math.min(1, (t - e.start) / e.duration);
+    const eased = x * x * (3 - 2 * x);
+    if (e.kind === "move") {
+      shift += Math.log(1 + e.move) * eased * (e.symbol === "*" ? beta(a) : 1);
+    } else if (x < 1) {
+      // Volatility burst: extra fast noise that fades in and out over the window.
+      const envelope = Math.sin(Math.PI * x);
+      shift += 4 * a.volatility * envelope * fastNoise(a.symbol + e.id, t);
+    }
+  }
+  return shift;
+}
+
+/** Only the short-period octaves: the "wiggle" without the trend. */
+function fastNoise(key: string, t: number): number {
+  const seeds = seedsFor(key);
+  let sum = 0;
+  for (let k = 5; k < OCTAVES.length; k++) {
+    const [period, amp] = OCTAVES[k];
+    sum += amp * valueNoise(seeds[k], t / period);
+  }
+  return sum;
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -105,7 +168,8 @@ export function priceAt(symbol: string, t: number): number {
   const logP =
     Math.log(a.refPrice) +
     a.drift * years +
-    a.volatility * (fractal(symbol, t) - fractal(symbol, REF_TIME));
+    a.volatility * (fractal(symbol, t) - fractal(symbol, REF_TIME)) +
+    (events.length ? eventShift(a, t) : 0);
   return roundPrice(Math.exp(logP));
 }
 
@@ -188,4 +252,73 @@ export function statsFor(symbol: string, now: number): AssetStats {
     yearLow: Math.min(...year),
     yearChangePct: (year[year.length - 1] - year[0]) / year[0],
   };
+}
+
+// ---------------------------------------------------------------------------
+// Candles (OHLC + volume)
+// ---------------------------------------------------------------------------
+
+export interface Candle {
+  /** Start of the candle. */
+  t: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  /** Simulated traded units in this candle. */
+  volume: number;
+}
+
+/** Candle size per range, chosen to give ~90–180 candles. */
+export const CANDLE_CONFIG: Record<Range, { span: number; step: number; label: string }> = {
+  "1D": { span: DAY, step: 15 * MINUTE, label: "15m" },
+  "1W": { span: 7 * DAY, step: 2 * HOUR, label: "2h" },
+  "1M": { span: 30 * DAY, step: 8 * HOUR, label: "8h" },
+  "1Y": { span: YEAR, step: 2 * DAY, label: "2D" },
+  "5Y": { span: 5 * YEAR, step: 14 * DAY, label: "2W" },
+};
+
+const SUBSAMPLES = 8;
+
+/**
+ * OHLC candles ending at `now`. `extra` adds that many candles before the range,
+ * which moving averages need to be defined from the first visible candle.
+ */
+export function candlesFor(symbol: string, range: Range, now: number, extra = 0): Candle[] {
+  const a = requireAsset(symbol);
+  const { span, step } = CANDLE_CONFIG[range];
+  const n = Math.round(span / step) + extra;
+  // Typical move per candle, used to make volume rise on big moves.
+  const typical = a.volatility * Math.sqrt(step / YEAR);
+  // Roughly €40M traded per day, varying by asset.
+  const baseUnits = ((40_000_000 / a.refPrice) * (0.4 + (hashString(symbol + "vol") % 1000) / 600) * step) / DAY;
+  const volSeed = hashString(symbol + "volume");
+
+  const candles: Candle[] = [];
+  for (let i = n; i > 0; i--) {
+    const start = now - i * step;
+    const open = priceAt(symbol, start);
+    let high = open;
+    let low = open;
+    let close = open;
+    for (let k = 1; k <= SUBSAMPLES; k++) {
+      close = priceAt(symbol, start + (step * k) / SUBSAMPLES);
+      if (close > high) high = close;
+      if (close < low) low = close;
+    }
+    const move = Math.abs(close / open - 1) + (high - low) / open / 2;
+    const noise = 0.6 + 0.4 * (lattice(volSeed, Math.floor(start / step)) + 1);
+    candles.push({ t: start, open, high, low, close, volume: Math.round(baseUnits * noise * (0.5 + move / typical)) });
+  }
+  return candles;
+}
+
+/** Simple moving average of closes; null until `window` values are available. */
+export function sma(candles: Candle[], window: number): (number | null)[] {
+  let sum = 0;
+  return candles.map((c, i) => {
+    sum += c.close;
+    if (i >= window) sum -= candles[i - window].close;
+    return i >= window - 1 ? sum / window : null;
+  });
 }

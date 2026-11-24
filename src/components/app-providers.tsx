@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { enabledFeatures } from "@/features";
+import { useDemoStore } from "@/lib/demo/store";
+import { rehydrateLocalStores } from "@/lib/local-store";
 import { market } from "@/lib/market/provider";
 import type { OrderEvent } from "@/lib/trading/orders";
 import { useAccountStore } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
 import { price, qty } from "@/lib/ui/format";
 import { toast } from "@/lib/ui/toasts";
+import { DemoControls } from "./demo-controls";
 import { Logo } from "./logo";
 import { Toaster } from "./toaster";
 
@@ -19,7 +23,11 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.resolve(useAccountStore.persist.rehydrate()).then(() => {
+    Promise.all([
+      useDemoStore.persist.rehydrate(),
+      useAccountStore.persist.rehydrate(),
+      rehydrateLocalStores(),
+    ]).then(() => {
       if (cancelled) return;
       if (!useAccountStore.getState().account) useAccountStore.getState().reset("demo");
       setReady(true);
@@ -41,6 +49,8 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         </div>
       )}
       {ready && <OrderProcessor />}
+      {ready && <DemoControls />}
+      {ready && <FeatureRunners />}
       <Toaster />
       <div className={ready ? undefined : "invisible"}>{children}</div>
     </>
@@ -56,6 +66,16 @@ function OrderProcessor() {
     events.forEach(announce);
   }, [now]);
   return null;
+}
+
+/** Background `Runner`s from registered features (src/features). */
+function FeatureRunners() {
+  const now = useNow();
+  return (
+    <>
+      {enabledFeatures().map((f) => (f.Runner ? <f.Runner key={f.id} now={now} /> : null))}
+    </>
+  );
 }
 
 function announce(e: OrderEvent) {

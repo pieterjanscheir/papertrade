@@ -3,14 +3,16 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, Star } from "lucide-react";
+import { enabledFeatures } from "@/features";
 import { ASSET_TYPE_LABEL } from "@/lib/market/assets";
 import { market } from "@/lib/market/provider";
-import { type Range } from "@/lib/market/simulator";
+import { sma, type Range } from "@/lib/market/simulator";
 import type { Side } from "@/lib/trading/engine";
 import { useAccount, useAccountStore } from "@/lib/trading/store";
 import { useNow } from "@/lib/ui/clock";
 import { dateTime, money, pct, price as fmtPrice, qty, signedMoney, tone } from "@/lib/ui/format";
 import { useIsWide } from "@/lib/ui/media";
+import { CandleChart, type Indicator } from "../candle-chart";
 import { OrderList } from "../open-orders";
 import { OrderForm } from "../order-form";
 import { PriceChart, type ChartMarker } from "../price-chart";
@@ -26,12 +28,32 @@ export function AssetScreen({ symbol }: { symbol: string }) {
   const [range, setRange] = useState<Range>("1D");
   const [hover, setHover] = useState<number | null>(null);
   const [trade, setTrade] = useState<Side | null>(null);
+  const [chartType, setChartType] = useState<"line" | "candles">("line");
+  const [overlays, setOverlays] = useState({ ma20: true, ma50: false, volume: true });
 
   const history = useMemo(() => market.history(symbol, range, now), [symbol, range, now]);
   const stats = useMemo(() => market.stats(symbol, now), [symbol, now]);
 
+  const MA_EXTRA = 50;
+  const allCandles = useMemo(
+    () => (chartType === "candles" ? market.candles(symbol, range, now, MA_EXTRA) : []),
+    [chartType, symbol, range, now],
+  );
+  const candles = allCandles.slice(MA_EXTRA);
+  const indicators: Indicator[] = [];
+  if (chartType === "candles") {
+    if (overlays.ma20) indicators.push({ label: "MA 20", color: "#f5a524", values: sma(allCandles, 20).slice(MA_EXTRA) });
+    if (overlays.ma50) indicators.push({ label: "MA 50", color: "#a46bff", values: sma(allCandles, 50).slice(MA_EXTRA) });
+  }
+
+  // Header follows whichever chart is being hovered.
   const first = history[0];
-  const shown = hover !== null ? history[hover] : history[history.length - 1];
+  const shown =
+    hover === null
+      ? history[history.length - 1]
+      : chartType === "candles"
+        ? { t: candles[hover].t, price: candles[hover].close }
+        : history[hover];
   const change = shown.price - first.price;
   const changePct = change / first.price;
 
@@ -50,6 +72,8 @@ export function AssetScreen({ symbol }: { symbol: string }) {
       tone: o.side === "buy" ? ("gain" as const) : ("loss" as const),
     })),
   ];
+
+  const featurePanels = enabledFeatures().map((f) => (f.AssetPanel ? <f.AssetPanel key={f.id} symbol={symbol} now={now} /> : null));
 
   const positionCard = position && (
     <Card className="grid grid-cols-2 gap-x-4 gap-y-4 p-5">
@@ -100,9 +124,59 @@ export function AssetScreen({ symbol }: { symbol: string }) {
           </div>
         </header>
 
-        <Card className="flex flex-col gap-4 p-3 pt-6 sm:p-5 sm:pt-8">
-          <PriceChart points={history.map((p) => ({ t: p.t, v: p.price }))} onHover={setHover} height={wide ? 380 : 240} markers={markers} />
-          <RangeTabs value={range} onChange={setRange} />
+        <Card className="flex flex-col gap-4 p-3 sm:p-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-full bg-surface-2 p-0.5 text-xs font-semibold">
+              {(["line", "candles"] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => (setChartType(t), setHover(null))}
+                  className={`rounded-full px-3 py-1.5 capitalize ${chartType === t ? "bg-line text-fg" : "text-muted hover:text-fg"}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            {chartType === "candles" && (
+              <>
+                {(
+                  [
+                    ["ma20", "MA 20", "#f5a524"],
+                    ["ma50", "MA 50", "#a46bff"],
+                    ["volume", "Volume", "var(--color-muted)"],
+                  ] as const
+                ).map(([key, label, color]) => (
+                  <button
+                    key={key}
+                    onClick={() => setOverlays((o) => ({ ...o, [key]: !o[key] }))}
+                    className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                      overlays[key] ? "border-line text-fg" : "border-transparent text-muted hover:text-fg"
+                    }`}
+                  >
+                    <span className="size-2 rounded-full" style={{ background: overlays[key] ? color : "var(--color-line)" }} />
+                    {label}
+                  </button>
+                ))}
+                <span className="ml-auto text-xs text-muted">{CANDLE_LABEL[range]} candles</span>
+              </>
+            )}
+          </div>
+          {chartType === "line" ? (
+            <div className="pt-3">
+              <PriceChart points={history.map((p) => ({ t: p.t, v: p.price }))} onHover={setHover} height={wide ? 380 : 240} markers={markers} />
+            </div>
+          ) : (
+            <CandleChart
+              candles={candles}
+              indicators={indicators}
+              showVolume={overlays.volume}
+              markers={markers}
+              height={wide ? 400 : 280}
+              timeFormat={(t) => timeLabel(t, range)}
+              onHover={setHover}
+            />
+          )}
+          <RangeTabs value={range} onChange={(r) => (setRange(r), setHover(null))} />
         </Card>
 
         {!wide && position && (
@@ -120,6 +194,9 @@ export function AssetScreen({ symbol }: { symbol: string }) {
             </Card>
           </div>
         )}
+
+        {/* Feature slot: AssetPanel (src/features), in the main column on small screens */}
+        {!wide && featurePanels}
 
         <div>
           <SectionTitle>Stats</SectionTitle>
@@ -199,6 +276,7 @@ export function AssetScreen({ symbol }: { symbol: string }) {
               </Card>
             </div>
           )}
+          {featurePanels}
         </aside>
       )}
 
@@ -217,6 +295,16 @@ export function AssetScreen({ symbol }: { symbol: string }) {
       <TradeSheet symbol={symbol} open={trade !== null} side={trade ?? "buy"} onClose={() => setTrade(null)} />
     </div>
   );
+}
+
+const CANDLE_LABEL: Record<Range, string> = { "1D": "15-minute", "1W": "2-hour", "1M": "8-hour", "1Y": "2-day", "5Y": "2-week" };
+
+function timeLabel(t: number, range: Range) {
+  const d = new Date(t);
+  if (range === "1D") return d.toLocaleTimeString("en-IE", { hour: "2-digit", minute: "2-digit" });
+  if (range === "1W") return d.toLocaleString("en-IE", { weekday: "short", hour: "2-digit", minute: "2-digit" });
+  if (range === "5Y") return d.toLocaleDateString("en-IE", { month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-IE", { day: "numeric", month: "short" });
 }
 
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {

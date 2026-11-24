@@ -10,6 +10,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { marketNow } from "../demo/store";
 import { market } from "../market/provider";
 import {
   deposit,
@@ -57,7 +58,7 @@ export const useAccountStore = create<AccountStore>()(
       placeOrder(req) {
         const account = get().account;
         if (!account) return { ok: false, error: "Account not loaded" };
-        const now = Date.now();
+        const now = marketNow();
         const r = executeOrder(account, req, market.priceAt(req.symbol, now), now);
         if (!r.ok) return r;
         set({ account: r.value.state });
@@ -67,7 +68,7 @@ export const useAccountStore = create<AccountStore>()(
       placePendingOrder(req) {
         const account = get().account;
         if (!account) return { ok: false, error: "Account not loaded" };
-        const r = placePendingOrder(account, req, Date.now());
+        const r = placePendingOrder(account, req, marketNow());
         if (!r.ok) return r;
         set({ account: r.value.state });
         return { ok: true, value: r.value.order };
@@ -75,7 +76,7 @@ export const useAccountStore = create<AccountStore>()(
 
       cancelOrder(id) {
         const account = get().account;
-        if (account) set({ account: cancelOrder(account, id, Date.now()) });
+        if (account) set({ account: cancelOrder(account, id, marketNow()) });
       },
 
       processOrders(now) {
@@ -90,7 +91,7 @@ export const useAccountStore = create<AccountStore>()(
       deposit(amount) {
         const account = get().account;
         if (!account) return { ok: false, error: "Account not loaded" };
-        const r = deposit(account, amount, Date.now());
+        const r = deposit(account, amount, marketNow());
         if (!r.ok) return r;
         set({ account: r.value });
         return { ok: true, value: null };
@@ -99,7 +100,7 @@ export const useAccountStore = create<AccountStore>()(
       withdraw(amount) {
         const account = get().account;
         if (!account) return { ok: false, error: "Account not loaded" };
-        const r = withdraw(account, amount, Date.now());
+        const r = withdraw(account, amount, marketNow());
         if (!r.ok) return r;
         set({ account: r.value });
         return { ok: true, value: null };
@@ -111,7 +112,7 @@ export const useAccountStore = create<AccountStore>()(
       },
 
       reset(kind) {
-        const now = Date.now();
+        const now = marketNow();
         set({
           account: kind === "demo" ? createDemoAccount(now, market.priceAt) : createFreshAccount(now),
         });

@@ -31,7 +31,7 @@ export function ActivityScreen() {
 
   const groups: { label: string; items: Transaction[] }[] = [];
   for (const tx of txs) {
-    const label = dayLabel(tx.time);
+    const label = dayLabel(tx.time, now);
     const last = groups[groups.length - 1];
     if (last?.label === label) last.items.push(tx);
     else groups.push({ label, items: [tx] });
